@@ -1,0 +1,109 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "first_name": "Prénom",
+    "last_name": "Nom de famille",
+    "phone": "Numéro de téléphone",
+    "address": "Adresse",
+    "country": "Pays",
+    "city": "Ville",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "loading": "Chargement...",
+    "submit": "Soumettre",
+    "back": "Retour",
+    "next": "Suivant",
+    "finish": "Terminer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "children": "Enfants",
+    "training": "Formation",
+    "donations": "Dons",
+    "collaboration": "Collaboration",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "admin": "Panneau d'administration"
+  },
+  "auth": {
+    "sign_in": "Se connecter",
+    "sign_up": "S'inscrire",
+    "forgot_password": "Mot de passe oublié ?",
+    "reset_password": "Réinitialiser le mot de passe",
+    "verify_email": "Vérifier l'e-mail",
+    "select_role": "Sélectionnez votre rôle",
+    "role_admin": "Administrateur",
+    "role_ngo": "ONG/Organisation partenaire",
+    "role_woman": "Femme en recherche de formation",
+    "role_donor": "Donateur/Supporter"
+  },
+  "dashboard": {
+    "overview": "Aperçu",
+    "statistics": "Statistiques",
+    "recent_activity": "Activité récente",
+    "quick_actions": "Actions rapides"
+  },
+  "children": {
+    "register_child": "Enregistrer un enfant",
+    "child_profile": "Profil de l'enfant",
+    "welfare_records": "Dossiers de protection",
+    "medical_history": "Antécédents médicaux",
+    "education": "Éducation",
+    "status": "Statut",
+    "events": "Événements",
+    "add_event": "Ajouter un événement"
+  },
+  "training": {
+    "programs": "Programmes de formation",
+    "my_enrollments": "Mes inscriptions",
+    "browse_programs": "Parcourir les programmes",
+    "enroll": "S'inscrire",
+    "progress": "Progrès",
+    "certificates": "Certificats",
+    "create_program": "Créer un programme"
+  },
+  "donations": {
+    "make_donation": "Faire un don",
+    "my_donations": "Mes dons",
+    "impact_reports": "Rapports d'impact",
+    "allocate_funds": "Allouer des fonds",
+    "donation_history": "Historique des dons",
+    "total_donated": "Total des dons",
+    "amount": "Montant"
+  },
+  "collaboration": {
+    "requests": "Demandes de collaboration",
+    "create_request": "Créer une demande",
+    "resources": "Ressources",
+    "share_resource": "Partager une ressource"
+  },
+  "messages": {
+    "inbox": "Boîte de réception",
+    "sent": "Messages envoyés",
+    "compose": "Composer un message",
+    "subject": "Sujet",
+    "recipient": "Destinataire",
+    "message": "Message"
+  },
+  "notifications": {
+    "all": "Toutes les notifications",
+    "unread": "Non lues",
+    "mark_all_read": "Tout marquer comme lu"
+  }
+}
+
+

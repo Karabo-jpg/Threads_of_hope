@@ -1,0 +1,109 @@
+{
+  "common": {
+    "welcome": "Karibu",
+    "login": "Ingia",
+    "logout": "Toka",
+    "register": "Jisajili",
+    "email": "Barua pepe",
+    "password": "Nywila",
+    "confirm_password": "Thibitisha Nywila",
+    "first_name": "Jina la Kwanza",
+    "last_name": "Jina la Mwisho",
+    "phone": "Nambari ya Simu",
+    "address": "Anwani",
+    "country": "Nchi",
+    "city": "Mji",
+    "save": "Hifadhi",
+    "cancel": "Ghairi",
+    "delete": "Futa",
+    "edit": "Hariri",
+    "view": "Angalia",
+    "search": "Tafuta",
+    "filter": "Chuja",
+    "export": "Hamisha",
+    "loading": "Inapakia...",
+    "submit": "Wasilisha",
+    "back": "Rudi",
+    "next": "Ifuatayo",
+    "finish": "Maliza"
+  },
+  "nav": {
+    "dashboard": "Dashibodi",
+    "children": "Watoto",
+    "training": "Mafunzo",
+    "donations": "Michango",
+    "collaboration": "Ushirikiano",
+    "messages": "Ujumbe",
+    "notifications": "Arifa",
+    "profile": "Wasifu",
+    "settings": "Mipangilio",
+    "admin": "Paneli ya Msimamizi"
+  },
+  "auth": {
+    "sign_in": "Ingia",
+    "sign_up": "Jisajili",
+    "forgot_password": "Umesahau Nywila?",
+    "reset_password": "Weka Upya Nywila",
+    "verify_email": "Thibitisha Barua pepe",
+    "select_role": "Chagua Jukumu Lako",
+    "role_admin": "Msimamizi",
+    "role_ngo": "Shirika la NGO/Mshirika",
+    "role_woman": "Mwanamke Anatafuta Mafunzo",
+    "role_donor": "Mchangiaji/Msaidizi"
+  },
+  "dashboard": {
+    "overview": "Muhtasari",
+    "statistics": "Takwimu",
+    "recent_activity": "Shughuli za Hivi Karibuni",
+    "quick_actions": "Vitendo vya Haraka"
+  },
+  "children": {
+    "register_child": "Sajili Mtoto",
+    "child_profile": "Wasifu wa Mtoto",
+    "welfare_records": "Rekodi za Ustawi",
+    "medical_history": "Historia ya Matibabu",
+    "education": "Elimu",
+    "status": "Hali",
+    "events": "Matukio",
+    "add_event": "Ongeza Tukio"
+  },
+  "training": {
+    "programs": "Programu za Mafunzo",
+    "my_enrollments": "Usajili Wangu",
+    "browse_programs": "Angalia Programu",
+    "enroll": "Jisajili",
+    "progress": "Maendeleo",
+    "certificates": "Vyeti",
+    "create_program": "Unda Programu"
+  },
+  "donations": {
+    "make_donation": "Toa Mchango",
+    "my_donations": "Michango Yangu",
+    "impact_reports": "Ripoti za Athari",
+    "allocate_funds": "Tenga Fedha",
+    "donation_history": "Historia ya Michango",
+    "total_donated": "Jumla ya Michango",
+    "amount": "Kiasi"
+  },
+  "collaboration": {
+    "requests": "Maombi ya Ushirikiano",
+    "create_request": "Unda Ombi",
+    "resources": "Rasilimali",
+    "share_resource": "Shiriki Rasilimali"
+  },
+  "messages": {
+    "inbox": "Kikasha cha Kupokea",
+    "sent": "Ujumbe Uliotumwa",
+    "compose": "Tunga Ujumbe",
+    "subject": "Mada",
+    "recipient": "Mpokeaji",
+    "message": "Ujumbe"
+  },
+  "notifications": {
+    "all": "Arifa Zote",
+    "unread": "Hazijasomawa",
+    "mark_all_read": "Weka Zote Zimesomwa"
+  }
+}
+
+

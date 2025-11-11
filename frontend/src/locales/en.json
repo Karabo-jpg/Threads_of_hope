@@ -1,0 +1,109 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "phone": "Phone Number",
+    "address": "Address",
+    "country": "Country",
+    "city": "City",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "children": "Children",
+    "training": "Training",
+    "donations": "Donations",
+    "collaboration": "Collaboration",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "admin": "Admin Panel"
+  },
+  "auth": {
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "forgot_password": "Forgot Password?",
+    "reset_password": "Reset Password",
+    "verify_email": "Verify Email",
+    "select_role": "Select Your Role",
+    "role_admin": "Administrator",
+    "role_ngo": "NGO/Partner Organization",
+    "role_woman": "Woman Seeking Training",
+    "role_donor": "Donor/Supporter"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "statistics": "Statistics",
+    "recent_activity": "Recent Activity",
+    "quick_actions": "Quick Actions"
+  },
+  "children": {
+    "register_child": "Register Child",
+    "child_profile": "Child Profile",
+    "welfare_records": "Welfare Records",
+    "medical_history": "Medical History",
+    "education": "Education",
+    "status": "Status",
+    "events": "Events",
+    "add_event": "Add Event"
+  },
+  "training": {
+    "programs": "Training Programs",
+    "my_enrollments": "My Enrollments",
+    "browse_programs": "Browse Programs",
+    "enroll": "Enroll",
+    "progress": "Progress",
+    "certificates": "Certificates",
+    "create_program": "Create Program"
+  },
+  "donations": {
+    "make_donation": "Make Donation",
+    "my_donations": "My Donations",
+    "impact_reports": "Impact Reports",
+    "allocate_funds": "Allocate Funds",
+    "donation_history": "Donation History",
+    "total_donated": "Total Donated",
+    "amount": "Amount"
+  },
+  "collaboration": {
+    "requests": "Collaboration Requests",
+    "create_request": "Create Request",
+    "resources": "Resources",
+    "share_resource": "Share Resource"
+  },
+  "messages": {
+    "inbox": "Inbox",
+    "sent": "Sent Messages",
+    "compose": "Compose Message",
+    "subject": "Subject",
+    "recipient": "Recipient",
+    "message": "Message"
+  },
+  "notifications": {
+    "all": "All Notifications",
+    "unread": "Unread",
+    "mark_all_read": "Mark All as Read"
+  }
+}
+
+
