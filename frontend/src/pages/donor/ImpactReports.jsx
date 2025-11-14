@@ -26,10 +26,11 @@ const ImpactReports = () => {
 
   const fetchReports = async () => {
     try {
-      const response = await api.get('/impact-reports/my-reports');
-      setReports(response.data.data);
+      const response = await api.get('/impact-reports');
+      setReports(response.data.data || []);
     } catch (error) {
       console.error('Error fetching impact reports:', error);
+      setReports([]);
     } finally {
       setLoading(false);
     }

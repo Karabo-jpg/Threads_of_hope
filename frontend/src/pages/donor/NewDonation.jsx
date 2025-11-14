@@ -26,7 +26,7 @@ const NewDonation = () => {
     purpose: '',
     recipientType: 'general',
     recipientId: '',
-    paymentMethod: 'card',
+    paymentMethod: 'credit_card',
     isRecurring: false,
     isAnonymous: false,
     message: '',
@@ -149,10 +149,12 @@ const NewDonation = () => {
                   onChange={handleChange}
                   label="Payment Method"
                 >
-                  <MenuItem value="card">Credit/Debit Card</MenuItem>
+                  <MenuItem value="credit_card">Credit Card</MenuItem>
+                  <MenuItem value="debit_card">Debit Card</MenuItem>
                   <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
                   <MenuItem value="mobile_money">Mobile Money</MenuItem>
                   <MenuItem value="paypal">PayPal</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

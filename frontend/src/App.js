@@ -17,6 +17,8 @@ import DonorDashboard from './pages/donor/Dashboard';
 import Donations from './pages/donor/Donations';
 import NewDonation from './pages/donor/NewDonation';
 import ImpactReports from './pages/donor/ImpactReports';
+import Messages from './pages/common/Messages';
+import Notifications from './pages/common/Notifications';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -87,6 +89,10 @@ function App() {
           <Route path="donations/new" element={<NewDonation />} />
           <Route path="impact" element={<ImpactReports />} />
         </Route>
+
+        {/* Common routes for all authenticated users */}
+        <Route path="messages" element={<Messages />} />
+        <Route path="notifications" element={<Notifications />} />
       </Route>
 
       {/* 404 */}

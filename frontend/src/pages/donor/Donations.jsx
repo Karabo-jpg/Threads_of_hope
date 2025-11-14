@@ -28,10 +28,11 @@ const Donations = () => {
 
   const fetchDonations = async () => {
     try {
-      const response = await api.get('/donations/my-donations');
-      setDonations(response.data.data);
+      const response = await api.get('/donations');
+      setDonations(response.data.data.donations || []);
     } catch (error) {
       console.error('Error fetching donations:', error);
+      setDonations([]);
     } finally {
       setLoading(false);
     }
