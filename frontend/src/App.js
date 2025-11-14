@@ -14,6 +14,9 @@ import AdminDashboard from './pages/admin/Dashboard';
 import NGODashboard from './pages/ngo/Dashboard';
 import WomanDashboard from './pages/woman/Dashboard';
 import DonorDashboard from './pages/donor/Dashboard';
+import Donations from './pages/donor/Donations';
+import NewDonation from './pages/donor/NewDonation';
+import ImpactReports from './pages/donor/ImpactReports';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -72,7 +75,12 @@ function App() {
         <Route path="woman/*" element={<PrivateRoute roles={['woman']}><WomanDashboard /></PrivateRoute>} />
         
         {/* Donor routes */}
-        <Route path="donor/*" element={<PrivateRoute roles={['donor']}><DonorDashboard /></PrivateRoute>} />
+        <Route path="donor" element={<PrivateRoute roles={['donor']} />}>
+          <Route index element={<DonorDashboard />} />
+          <Route path="donations" element={<Donations />} />
+          <Route path="donations/new" element={<NewDonation />} />
+          <Route path="impact" element={<ImpactReports />} />
+        </Route>
       </Route>
 
       {/* 404 */}

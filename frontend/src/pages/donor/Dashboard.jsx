@@ -40,7 +40,7 @@ const DonorDashboard = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate('/donations/new')}
+          onClick={() => navigate('/donor/donations/new')}
         >
           Make a Donation
         </Button>
@@ -103,11 +103,11 @@ const DonorDashboard = () => {
               are making a real difference in the lives of children and women in our communities.
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              <Button variant="outlined" onClick={() => navigate('/donations')}>
+              <Button variant="outlined" onClick={() => navigate('/donor/donations')}>
                 View All Donations
               </Button>
-              <Button variant="outlined" onClick={() => navigate('/children')}>
-                See Beneficiaries
+              <Button variant="outlined" onClick={() => navigate('/donor/impact')}>
+                View Impact Reports
               </Button>
             </Box>
           </Paper>

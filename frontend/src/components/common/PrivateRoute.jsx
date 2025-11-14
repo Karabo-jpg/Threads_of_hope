@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const PrivateRoute = ({ children, roles }) => {
@@ -12,7 +12,9 @@ const PrivateRoute = ({ children, roles }) => {
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  // If children is provided, render it (for wrapping components)
+  // If not, render Outlet (for nested routes)
+  return children || <Outlet />;
 };
 
 export default PrivateRoute;
