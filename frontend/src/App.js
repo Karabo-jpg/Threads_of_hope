@@ -36,13 +36,13 @@ function App() {
     
     switch (user.role) {
       case 'admin':
-        return <AdminDashboard />;
+        return <Navigate to="/admin" replace />;
       case 'ngo':
-        return <NGODashboard />;
+        return <Navigate to="/ngo" replace />;
       case 'woman':
-        return <WomanDashboard />;
+        return <Navigate to="/woman" replace />;
       case 'donor':
-        return <DonorDashboard />;
+        return <Navigate to="/donor" replace />;
       default:
         return <Navigate to="/login" />;
     }
@@ -66,13 +66,19 @@ function App() {
         <Route index element={getDashboardRoute()} />
         
         {/* Admin routes */}
-        <Route path="admin/*" element={<PrivateRoute roles={['admin']}><AdminDashboard /></PrivateRoute>} />
+        <Route path="admin" element={<PrivateRoute roles={['admin']} />}>
+          <Route index element={<AdminDashboard />} />
+        </Route>
         
         {/* NGO routes */}
-        <Route path="ngo/*" element={<PrivateRoute roles={['ngo', 'admin']}><NGODashboard /></PrivateRoute>} />
+        <Route path="ngo" element={<PrivateRoute roles={['ngo', 'admin']} />}>
+          <Route index element={<NGODashboard />} />
+        </Route>
         
         {/* Woman routes */}
-        <Route path="woman/*" element={<PrivateRoute roles={['woman']}><WomanDashboard /></PrivateRoute>} />
+        <Route path="woman" element={<PrivateRoute roles={['woman']} />}>
+          <Route index element={<WomanDashboard />} />
+        </Route>
         
         {/* Donor routes */}
         <Route path="donor" element={<PrivateRoute roles={['donor']} />}>

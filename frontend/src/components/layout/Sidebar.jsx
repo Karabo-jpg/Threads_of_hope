@@ -63,9 +63,11 @@ const Sidebar = () => {
         { text: t('nav.training'), icon: <SchoolIcon />, path: '/training' },
       ],
       donor: [
-        ...commonItems,
-        { text: t('nav.donations'), icon: <FavoriteIcon />, path: '/donations' },
-        { text: t('nav.children'), icon: <ChildCareIcon />, path: '/children' },
+        { text: t('nav.dashboard'), icon: <DashboardIcon />, path: '/donor' },
+        { text: t('nav.donations'), icon: <FavoriteIcon />, path: '/donor/donations' },
+        { text: 'Impact Reports', icon: <HandshakeIcon />, path: '/donor/impact' },
+        { text: t('nav.messages'), icon: <MessageIcon />, path: '/messages' },
+        { text: t('nav.notifications'), icon: <NotificationsIcon />, path: '/notifications' },
       ],
     };
 
