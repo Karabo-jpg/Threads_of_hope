@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(
-  process.env.DATABASE_URL || process.env.DB_NAME,
+  process.env.DB_NAME,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
@@ -17,10 +17,10 @@ const sequelize = new Sequelize(
       idle: 10000,
     },
     dialectOptions: {
-      ssl: process.env.NODE_ENV === 'production' ? {
+      ssl: {
         require: true,
         rejectUnauthorized: false
-      } : false
+      }
     }
   }
 );

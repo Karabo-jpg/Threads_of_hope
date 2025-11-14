@@ -1,8 +1,21 @@
 const sgMail = require('@sendgrid/mail');
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Initialize SendGrid only if API key is provided
+const isEmailEnabled = process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.length > 0;
+
+if (isEmailEnabled) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('✅ SendGrid email service enabled');
+} else {
+  console.log('⚠️  SendGrid email service disabled (no API key provided)');
+}
 
 const sendEmail = async (to, subject, text, html) => {
+  if (!isEmailEnabled) {
+    console.log(`📧 Email would be sent to ${to} (subject: ${subject}) - Email service disabled`);
+    return { success: true, disabled: true };
+  }
+
   try {
     const msg = {
       to,
