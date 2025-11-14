@@ -7,20 +7,15 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  IconButton,
   Chip,
   Button,
   Divider,
 } from '@mui/material';
 import {
   Notifications as NotificationsIcon,
-  CheckCircle as CheckIcon,
-  Delete as DeleteIcon,
-  Circle as CircleIcon,
-  Favorite as FavoriteIcon,
-  School as SchoolIcon,
-  ChildCare as ChildCareIcon,
+  CheckCircle as CheckCircleIcon,
   Info as InfoIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -36,7 +31,7 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const response = await api.get('/notifications');
-      setNotifications(response.data.data);
+      setNotifications(response.data.data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -44,7 +39,7 @@ const Notifications = () => {
     }
   };
 
-  const handleMarkAsRead = async (notificationId) => {
+  const markAsRead = async (notificationId) => {
     try {
       await api.put(`/notifications/${notificationId}/read`);
       fetchNotifications();
@@ -53,7 +48,7 @@ const Notifications = () => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
+  const markAllAsRead = async () => {
     try {
       await api.put('/notifications/mark-all-read');
       fetchNotifications();
@@ -62,38 +57,30 @@ const Notifications = () => {
     }
   };
 
-  const handleDeleteNotification = async (notificationId) => {
-    try {
-      await api.delete(`/notifications/${notificationId}`);
-      fetchNotifications();
-    } catch (error) {
-      console.error('Error deleting notification:', error);
+  const getIcon = (type) => {
+    switch (type) {
+      case 'donation_received':
+      case 'donation_allocated':
+        return <CheckCircleIcon color="success" />;
+      case 'enrollment_approved':
+      case 'training_completed':
+        return <CheckCircleIcon color="primary" />;
+      case 'enrollment_rejected':
+        return <WarningIcon color="error" />;
+      default:
+        return <InfoIcon color="info" />;
     }
   };
 
-  const getNotificationIcon = (type) => {
-    const icons = {
-      donation_received: <FavoriteIcon color="error" />,
-      enrollment_approved: <SchoolIcon color="success" />,
-      enrollment_rejected: <SchoolIcon color="error" />,
-      child_update: <ChildCareIcon color="primary" />,
-      training_started: <SchoolIcon color="info" />,
-      training_completed: <SchoolIcon color="success" />,
-      certificate_issued: <SchoolIcon color="success" />,
-      message_received: <NotificationsIcon color="primary" />,
-      system: <InfoIcon color="info" />,
-    };
-    return icons[type] || <NotificationsIcon />;
-  };
-
   const getPriorityColor = (priority) => {
-    const colors = {
-      urgent: 'error',
-      high: 'warning',
-      normal: 'info',
-      low: 'default',
-    };
-    return colors[priority] || 'default';
+    switch (priority) {
+      case 'urgent':
+        return 'error';
+      case 'high':
+        return 'warning';
+      default:
+        return 'default';
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -103,20 +90,19 @@ const Notifications = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">Notifications</Typography>
+        <Typography variant="h4">
+          Notifications
           {unreadCount > 0 && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-            </Typography>
+            <Chip
+              label={`${unreadCount} unread`}
+              color="primary"
+              size="small"
+              sx={{ ml: 2 }}
+            />
           )}
-        </Box>
+        </Typography>
         {unreadCount > 0 && (
-          <Button
-            variant="outlined"
-            startIcon={<CheckIcon />}
-            onClick={handleMarkAllAsRead}
-          >
+          <Button variant="outlined" onClick={markAllAsRead}>
             Mark All as Read
           </Button>
         )}
@@ -132,68 +118,52 @@ const Notifications = () => {
               />
             </ListItem>
           ) : (
-            notifications.map((notification) => (
+            notifications.map((notification, index) => (
               <React.Fragment key={notification.id}>
                 <ListItem
                   sx={{
                     bgcolor: notification.isRead ? 'transparent' : 'action.hover',
-                    '&:hover': {
-                      bgcolor: 'action.selected',
-                    },
+                    '&:hover': { bgcolor: 'action.selected' },
                   }}
                 >
-                  <ListItemIcon>{getNotificationIcon(notification.type)}</ListItemIcon>
+                  <ListItemIcon>{getIcon(notification.type)}</ListItemIcon>
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body1" fontWeight={notification.isRead ? 'normal' : 'bold'}>
+                        <Typography variant="body1" fontWeight={notification.isRead ? 400 : 600}>
                           {notification.title}
                         </Typography>
-                        {!notification.isRead && (
-                          <CircleIcon sx={{ fontSize: 8, color: 'primary.main' }} />
+                        {notification.priority && notification.priority !== 'normal' && (
+                          <Chip
+                            label={notification.priority}
+                            size="small"
+                            color={getPriorityColor(notification.priority)}
+                          />
                         )}
-                        <Chip
-                          label={notification.priority}
-                          size="small"
-                          color={getPriorityColor(notification.priority)}
-                          sx={{ ml: 'auto' }}
-                        />
                       </Box>
                     }
                     secondary={
-                      <>
-                        <Typography component="span" variant="body2" color="text.primary">
+                      <React.Fragment>
+                        <Typography variant="body2" component="span">
                           {notification.message}
                         </Typography>
                         <br />
-                        <Typography component="span" variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary">
                           {new Date(notification.createdAt).toLocaleString()}
                         </Typography>
-                      </>
+                      </React.Fragment>
                     }
                   />
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    {!notification.isRead && (
-                      <IconButton
-                        edge="end"
-                        aria-label="mark as read"
-                        onClick={() => handleMarkAsRead(notification.id)}
-                        size="small"
-                      >
-                        <CheckIcon />
-                      </IconButton>
-                    )}
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDeleteNotification(notification.id)}
+                  {!notification.isRead && (
+                    <Button
                       size="small"
+                      onClick={() => markAsRead(notification.id)}
                     >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
+                      Mark as Read
+                    </Button>
+                  )}
                 </ListItem>
-                <Divider />
+                {index < notifications.length - 1 && <Divider />}
               </React.Fragment>
             ))
           )}

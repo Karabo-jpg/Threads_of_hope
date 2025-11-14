@@ -29,7 +29,7 @@ const Donations = () => {
   const fetchDonations = async () => {
     try {
       const response = await api.get('/donations');
-      setDonations(response.data.data.donations || []);
+      setDonations(response.data.data || []);
     } catch (error) {
       console.error('Error fetching donations:', error);
       setDonations([]);

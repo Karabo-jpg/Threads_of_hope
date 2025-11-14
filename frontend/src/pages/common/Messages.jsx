@@ -8,27 +8,19 @@ import {
   ListItemText,
   ListItemAvatar,
   Avatar,
+  Divider,
   TextField,
   Button,
   Grid,
-  Divider,
-  IconButton,
-  Badge,
 } from '@mui/material';
-import {
-  Send as SendIcon,
-  Delete as DeleteIcon,
-  Person as PersonIcon,
-} from '@mui/icons-material';
-import { useSelector } from 'react-redux';
+import { Send as SendIcon } from '@mui/icons-material';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const Messages = () => {
-  const { user } = useSelector((state) => state.auth);
   const [messages, setMessages] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [newMessage, setNewMessage] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [reply, setReply] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,8 +29,8 @@ const Messages = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await api.get('/messages/inbox');
-      setMessages(response.data.data);
+      const response = await api.get('/messages');
+      setMessages(response.data.data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -46,29 +38,19 @@ const Messages = () => {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+  const handleSendReply = async () => {
+    if (!reply.trim() || !selectedMessage) return;
 
     try {
       await api.post('/messages', {
-        recipientId: selectedConversation.senderId,
-        content: newMessage,
-        subject: selectedConversation.subject || 'Re: Message',
+        recipientId: selectedMessage.senderId,
+        subject: `RE: ${selectedMessage.subject}`,
+        content: reply,
       });
-      setNewMessage('');
+      setReply('');
       fetchMessages();
     } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
-
-  const handleDeleteMessage = async (messageId) => {
-    try {
-      await api.delete(`/messages/${messageId}`);
-      fetchMessages();
-      setSelectedConversation(null);
-    } catch (error) {
-      console.error('Error deleting message:', error);
+      console.error('Error sending reply:', error);
     }
   };
 
@@ -80,10 +62,9 @@ const Messages = () => {
         Messages
       </Typography>
 
-      <Grid container spacing={2} sx={{ mt: 2, height: 'calc(100vh - 200px)' }}>
-        {/* Message List */}
+      <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ height: '100%', overflow: 'auto' }}>
+          <Paper sx={{ maxHeight: '70vh', overflow: 'auto' }}>
             <List>
               {messages.length === 0 ? (
                 <ListItem>
@@ -97,34 +78,25 @@ const Messages = () => {
                   <React.Fragment key={message.id}>
                     <ListItem
                       button
-                      selected={selectedConversation?.id === message.id}
-                      onClick={() => setSelectedConversation(message)}
+                      selected={selectedMessage?.id === message.id}
+                      onClick={() => setSelectedMessage(message)}
                     >
                       <ListItemAvatar>
-                        <Badge
-                          color="primary"
-                          variant="dot"
-                          invisible={message.isRead}
-                        >
-                          <Avatar>
-                            <PersonIcon />
-                          </Avatar>
-                        </Badge>
+                        <Avatar>
+                          {message.senderName?.charAt(0) || 'U'}
+                        </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={message.subject || 'No Subject'}
                         secondary={
-                          <>
-                            <Typography component="span" variant="body2">
-                              {message.Sender?.firstName} {message.Sender?.lastName}
+                          <React.Fragment>
+                            <Typography variant="body2" component="span">
+                              {message.senderName || 'Unknown Sender'}
                             </Typography>
-                            {' — '}
-                            {message.content?.substring(0, 50)}...
-                          </>
+                            <br />
+                            {new Date(message.createdAt).toLocaleDateString()}
+                          </React.Fragment>
                         }
-                        primaryTypographyProps={{
-                          fontWeight: message.isRead ? 'normal' : 'bold',
-                        }}
                       />
                     </ListItem>
                     <Divider />
@@ -135,78 +107,49 @@ const Messages = () => {
           </Paper>
         </Grid>
 
-        {/* Message Content */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            {selectedConversation ? (
-              <>
-                {/* Message Header */}
-                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6">
-                        {selectedConversation.subject || 'No Subject'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        From: {selectedConversation.Sender?.firstName}{' '}
-                        {selectedConversation.Sender?.lastName} ({selectedConversation.Sender?.email})
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(selectedConversation.createdAt).toLocaleString()}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteMessage(selectedConversation.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-
-                {/* Message Body */}
-                <Box sx={{ flexGrow: 1, p: 2, overflow: 'auto' }}>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {selectedConversation.content}
-                  </Typography>
-                </Box>
-
-                {/* Reply Section */}
-                <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Type your reply..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    sx={{ mb: 1 }}
-                  />
-                  <Button
-                    variant="contained"
-                    endIcon={<SendIcon />}
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                  >
-                    Send Reply
-                  </Button>
-                </Box>
-              </>
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                }}
+          {selectedMessage ? (
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                {selectedMessage.subject}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                From: {selectedMessage.senderName || 'Unknown'}
+                <br />
+                Date: {new Date(selectedMessage.createdAt).toLocaleString()}
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="body1" paragraph>
+                {selectedMessage.content}
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                Reply
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                placeholder="Type your reply..."
+              />
+              <Button
+                variant="contained"
+                startIcon={<SendIcon />}
+                onClick={handleSendReply}
+                sx={{ mt: 2 }}
               >
-                <Typography variant="h6" color="text.secondary">
-                  Select a message to read
-                </Typography>
-              </Box>
-            )}
-          </Paper>
+                Send Reply
+              </Button>
+            </Paper>
+          ) : (
+            <Paper sx={{ p: 3, textAlign: 'center', height: '70vh' }}>
+              <Typography variant="body1" color="text.secondary">
+                Select a message to view
+              </Typography>
+            </Paper>
+          )}
         </Grid>
       </Grid>
     </Box>

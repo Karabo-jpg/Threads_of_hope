@@ -25,7 +25,8 @@ const NewDonation = () => {
     currency: 'USD',
     purpose: '',
     recipientType: 'general',
-    recipientId: '',
+    recipientId: null,
+    ngoId: null,
     paymentMethod: 'credit_card',
     isRecurring: false,
     isAnonymous: false,
@@ -46,13 +47,20 @@ const NewDonation = () => {
     setError('');
 
     try {
-      await api.post('/donations', formData);
+      // Convert amount to number
+      const donationData = {
+        ...formData,
+        amount: parseFloat(formData.amount),
+      };
+      
+      const response = await api.post('/donations', donationData);
       setSuccess(true);
       setTimeout(() => {
         navigate('/donor/donations');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to process donation');
+      console.error('Donation error:', err.response?.data);
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to process donation');
     } finally {
       setLoading(false);
     }
@@ -134,7 +142,8 @@ const NewDonation = () => {
                 >
                   <MenuItem value="general">General Fund</MenuItem>
                   <MenuItem value="child">Support a Child</MenuItem>
-                  <MenuItem value="training">Training Program</MenuItem>
+                  <MenuItem value="woman">Support Women Empowerment</MenuItem>
+                  <MenuItem value="program">Training Program</MenuItem>
                   <MenuItem value="ngo">Support an NGO</MenuItem>
                 </Select>
               </FormControl>

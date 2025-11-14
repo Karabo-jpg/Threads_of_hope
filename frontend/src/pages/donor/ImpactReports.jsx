@@ -26,8 +26,11 @@ const ImpactReports = () => {
 
   const fetchReports = async () => {
     try {
-      const response = await api.get('/impact-reports');
-      setReports(response.data.data || []);
+      const response = await api.get('/donations');
+      // Filter for donations that have impact reports
+      const donationsWithReports = response.data.data || [];
+      // For now, show all donations as we'll add impact reports feature later
+      setReports([]);
     } catch (error) {
       console.error('Error fetching impact reports:', error);
       setReports([]);
