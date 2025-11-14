@@ -29,7 +29,17 @@ const Donations = () => {
   const fetchDonations = async () => {
     try {
       const response = await api.get('/donations');
-      setDonations(response.data.data || []);
+      const data = response.data.data;
+      
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setDonations(data);
+      } else if (data && Array.isArray(data.donations)) {
+        setDonations(data.donations);
+      } else {
+        console.log('No donations data or unexpected format:', response.data);
+        setDonations([]);
+      }
     } catch (error) {
       console.error('Error fetching donations:', error);
       setDonations([]);
@@ -49,6 +59,9 @@ const Donations = () => {
   };
 
   if (loading) return <LoadingSpinner />;
+
+  // Extra safety check
+  const donationsList = Array.isArray(donations) ? donations : [];
 
   return (
     <Box>
@@ -77,7 +90,7 @@ const Donations = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {donations.length === 0 ? (
+            {donationsList.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
                   <Typography variant="body1" color="text.secondary" sx={{ py: 3 }}>
@@ -86,7 +99,7 @@ const Donations = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              donations.map((donation) => (
+              donationsList.map((donation) => (
                 <TableRow key={donation.id}>
                   <TableCell>
                     {new Date(donation.donationDate).toLocaleDateString()}
