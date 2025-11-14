@@ -31,9 +31,31 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const response = await api.get('/notifications');
-      setNotifications(response.data.data || []);
+      console.log('Notifications API response:', response.data);
+      
+      // Handle different response formats - ensure we always set an array
+      let notificationsData = [];
+      
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          notificationsData = response.data;
+        } else if (response.data.data) {
+          if (Array.isArray(response.data.data)) {
+            notificationsData = response.data.data;
+          } else if (response.data.data.notifications && Array.isArray(response.data.data.notifications)) {
+            notificationsData = response.data.data.notifications;
+          }
+        } else if (response.data.notifications && Array.isArray(response.data.notifications)) {
+          notificationsData = response.data.notifications;
+        }
+      }
+      
+      console.log('Setting notifications to:', notificationsData);
+      setNotifications(notificationsData);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      console.error('Error details:', error.response?.data);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -85,7 +107,9 @@ const Notifications = () => {
 
   if (loading) return <LoadingSpinner />;
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // Extra safety check - ensure notifications is always an array
+  const notificationsList = Array.isArray(notifications) ? notifications : [];
+  const unreadCount = notificationsList.filter((n) => !n.isRead).length;
 
   return (
     <Box>
@@ -110,7 +134,7 @@ const Notifications = () => {
 
       <Paper>
         <List>
-          {notifications.length === 0 ? (
+          {notificationsList.length === 0 ? (
             <ListItem>
               <ListItemText
                 primary="No notifications"
@@ -118,7 +142,7 @@ const Notifications = () => {
               />
             </ListItem>
           ) : (
-            notifications.map((notification, index) => (
+            notificationsList.map((notification, index) => (
               <React.Fragment key={notification.id}>
                 <ListItem
                   sx={{
@@ -163,7 +187,7 @@ const Notifications = () => {
                     </Button>
                   )}
                 </ListItem>
-                {index < notifications.length - 1 && <Divider />}
+                {index < notificationsList.length - 1 && <Divider />}
               </React.Fragment>
             ))
           )}

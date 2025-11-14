@@ -30,9 +30,31 @@ const Messages = () => {
   const fetchMessages = async () => {
     try {
       const response = await api.get('/messages');
-      setMessages(response.data.data || []);
+      console.log('Messages API response:', response.data);
+      
+      // Handle different response formats - ensure we always set an array
+      let messagesData = [];
+      
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          messagesData = response.data;
+        } else if (response.data.data) {
+          if (Array.isArray(response.data.data)) {
+            messagesData = response.data.data;
+          } else if (response.data.data.messages && Array.isArray(response.data.data.messages)) {
+            messagesData = response.data.data.messages;
+          }
+        } else if (response.data.messages && Array.isArray(response.data.messages)) {
+          messagesData = response.data.messages;
+        }
+      }
+      
+      console.log('Setting messages to:', messagesData);
+      setMessages(messagesData);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      console.error('Error details:', error.response?.data);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -56,6 +78,9 @@ const Messages = () => {
 
   if (loading) return <LoadingSpinner />;
 
+  // Extra safety check - ensure messages is always an array
+  const messagesList = Array.isArray(messages) ? messages : [];
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -66,7 +91,7 @@ const Messages = () => {
         <Grid item xs={12} md={4}>
           <Paper sx={{ maxHeight: '70vh', overflow: 'auto' }}>
             <List>
-              {messages.length === 0 ? (
+              {messagesList.length === 0 ? (
                 <ListItem>
                   <ListItemText
                     primary="No messages"
@@ -74,7 +99,7 @@ const Messages = () => {
                   />
                 </ListItem>
               ) : (
-                messages.map((message) => (
+                messagesList.map((message) => (
                   <React.Fragment key={message.id}>
                     <ListItem
                       button
