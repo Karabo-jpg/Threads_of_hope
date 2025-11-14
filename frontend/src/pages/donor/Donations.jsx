@@ -29,19 +29,30 @@ const Donations = () => {
   const fetchDonations = async () => {
     try {
       const response = await api.get('/donations');
-      const data = response.data.data;
+      console.log('Donations API response:', response.data);
       
-      // Ensure we always set an array
-      if (Array.isArray(data)) {
-        setDonations(data);
-      } else if (data && Array.isArray(data.donations)) {
-        setDonations(data.donations);
-      } else {
-        console.log('No donations data or unexpected format:', response.data);
-        setDonations([]);
+      // Handle different response formats
+      let donationsData = [];
+      
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          donationsData = response.data;
+        } else if (response.data.data) {
+          if (Array.isArray(response.data.data)) {
+            donationsData = response.data.data;
+          } else if (response.data.data.donations && Array.isArray(response.data.data.donations)) {
+            donationsData = response.data.data.donations;
+          }
+        } else if (response.data.donations && Array.isArray(response.data.donations)) {
+          donationsData = response.data.donations;
+        }
       }
+      
+      console.log('Setting donations to:', donationsData);
+      setDonations(donationsData);
     } catch (error) {
       console.error('Error fetching donations:', error);
+      console.error('Error details:', error.response?.data);
       setDonations([]);
     } finally {
       setLoading(false);
