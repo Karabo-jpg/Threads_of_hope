@@ -26,12 +26,16 @@ const NGODashboard = () => {
         api.get('/donations/statistics'),
       ]);
       
+      console.log('Children Stats:', childrenRes.data.data);
+      console.log('Donations Stats:', donationsRes.data.data);
+      
       setStats({
         children: childrenRes.data.data,
         donations: donationsRes.data.data,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
+      console.error('Error details:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -100,7 +104,10 @@ const NGODashboard = () => {
                 <HandshakeIcon fontSize="large" color="success" />
                 <Box>
                   <Typography variant="h4">
-                    ${stats?.donations?.totalDonations?.toLocaleString() || 0}
+                    ${parseFloat(stats?.donations?.totalDonations || 0).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
                   </Typography>
                   <Typography color="text.secondary">Total Funds</Typography>
                 </Box>

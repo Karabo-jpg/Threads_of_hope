@@ -20,6 +20,7 @@ const NewDonation = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [ngos, setNgos] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
     currency: 'USD',
@@ -32,6 +33,21 @@ const NewDonation = () => {
     isAnonymous: false,
     message: '',
   });
+
+  useEffect(() => {
+    if (formData.recipientType === 'ngo') {
+      fetchNGOs();
+    }
+  }, [formData.recipientType]);
+
+  const fetchNGOs = async () => {
+    try {
+      const response = await api.get('/donations/recipients/ngo');
+      setNgos(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching NGOs:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -148,6 +164,30 @@ const NewDonation = () => {
                 </Select>
               </FormControl>
             </Grid>
+
+            {formData.recipientType === 'ngo' && (
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Select NGO</InputLabel>
+                  <Select
+                    name="ngoId"
+                    value={formData.ngoId || ''}
+                    onChange={handleChange}
+                    label="Select NGO"
+                  >
+                    {ngos.length === 0 ? (
+                      <MenuItem value="" disabled>No NGOs available</MenuItem>
+                    ) : (
+                      ngos.map((ngo) => (
+                        <MenuItem key={ngo.id} value={ngo.id}>
+                          {ngo.firstName} {ngo.lastName}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
