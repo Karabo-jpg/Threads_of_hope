@@ -14,6 +14,7 @@ const messageValidation = [
 ];
 
 // Routes
+router.get('/', verifyToken, messageController.getInbox); // Get all messages (default to inbox)
 router.post('/', verifyToken, messageValidation, messageController.sendMessage);
 router.get('/inbox', verifyToken, messageController.getInbox);
 router.get('/sent', verifyToken, messageController.getSentMessages);
