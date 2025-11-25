@@ -303,13 +303,13 @@ exports.getDonationStatistics = async (req, res, next) => {
 
     const byMonth = await Donation.sequelize.query(`
       SELECT 
-        TO_CHAR(donation_date, 'YYYY-MM') as month,
+        TO_CHAR("donationDate", 'YYYY-MM') as month,
         COUNT(*) as count,
         SUM(amount) as total
       FROM donations
-      WHERE donation_date >= NOW() - INTERVAL '12 months'
-        ${req.user.role === 'donor' ? `AND donor_id = '${req.user.id}'` : ''}
-        ${req.user.role === 'ngo' ? `AND ngo_id = '${req.user.id}'` : ''}
+      WHERE "donationDate" >= NOW() - INTERVAL '12 months'
+        ${req.user.role === 'donor' ? `AND "donorId" = '${req.user.id}'` : ''}
+        ${req.user.role === 'ngo' ? `AND "ngoId" = '${req.user.id}'` : ''}
       GROUP BY month
       ORDER BY month DESC
     `, { type: Donation.sequelize.QueryTypes.SELECT });
