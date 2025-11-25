@@ -12,6 +12,10 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminDashboard from './pages/admin/Dashboard';
 import NGODashboard from './pages/ngo/Dashboard';
+import Children from './pages/ngo/Children';
+import Training from './pages/ngo/Training';
+import NGODonations from './pages/ngo/NGODonations';
+import Collaboration from './pages/ngo/Collaboration';
 import WomanDashboard from './pages/woman/Dashboard';
 import DonorDashboard from './pages/donor/Dashboard';
 import Donations from './pages/donor/Donations';
@@ -75,6 +79,18 @@ function App() {
         {/* NGO routes */}
         <Route path="ngo" element={<PrivateRoute roles={['ngo', 'admin']} />}>
           <Route index element={<NGODashboard />} />
+        </Route>
+        <Route path="children" element={<PrivateRoute roles={['ngo', 'admin']} />}>
+          <Route index element={<Children />} />
+        </Route>
+        <Route path="training" element={<PrivateRoute roles={['ngo', 'admin']} />}>
+          <Route index element={<Training />} />
+        </Route>
+        <Route path="donations" element={<PrivateRoute roles={['ngo', 'donor', 'admin']} />}>
+          <Route index element={<NGODonations />} />
+        </Route>
+        <Route path="collaboration" element={<PrivateRoute roles={['ngo', 'admin']} />}>
+          <Route index element={<Collaboration />} />
         </Route>
         
         {/* Woman routes */}
