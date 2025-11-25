@@ -18,6 +18,7 @@ import Training from './pages/ngo/Training';
 import CreateProgram from './pages/ngo/CreateProgram';
 import NGODonations from './pages/ngo/NGODonations';
 import Collaboration from './pages/ngo/Collaboration';
+import CreateCollaboration from './pages/ngo/CreateCollaboration';
 import WomanDashboard from './pages/woman/Dashboard';
 import DonorDashboard from './pages/donor/Dashboard';
 import Donations from './pages/donor/Donations';
@@ -81,20 +82,13 @@ function App() {
         {/* NGO routes */}
         <Route path="ngo" element={<PrivateRoute roles={['ngo', 'admin']} />}>
           <Route index element={<NGODashboard />} />
-        </Route>
-        <Route path="children" element={<PrivateRoute roles={['ngo', 'admin']} />}>
-          <Route index element={<Children />} />
-          <Route path="register" element={<RegisterChild />} />
-        </Route>
-        <Route path="training" element={<PrivateRoute roles={['ngo', 'admin']} />}>
-          <Route index element={<Training />} />
-          <Route path="create" element={<CreateProgram />} />
-        </Route>
-        <Route path="donations" element={<PrivateRoute roles={['ngo', 'donor', 'admin']} />}>
-          <Route index element={<NGODonations />} />
-        </Route>
-        <Route path="collaboration" element={<PrivateRoute roles={['ngo', 'admin']} />}>
-          <Route index element={<Collaboration />} />
+          <Route path="children" element={<Children />} />
+          <Route path="children/register" element={<RegisterChild />} />
+          <Route path="training" element={<Training />} />
+          <Route path="training/create" element={<CreateProgram />} />
+          <Route path="donations" element={<NGODonations />} />
+          <Route path="collaboration" element={<Collaboration />} />
+          <Route path="collaboration/create" element={<CreateCollaboration />} />
         </Route>
         
         {/* Woman routes */}
