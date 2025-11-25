@@ -315,14 +315,14 @@ exports.getChildStatistics = async (req, res, next) => {
     const byAge = await Child.sequelize.query(`
       SELECT 
         CASE 
-          WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) < 5 THEN '0-4'
-          WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) BETWEEN 5 AND 12 THEN '5-12'
-          WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) BETWEEN 13 AND 17 THEN '13-17'
+          WHEN EXTRACT(YEAR FROM AGE("dateOfBirth")) < 5 THEN '0-4'
+          WHEN EXTRACT(YEAR FROM AGE("dateOfBirth")) BETWEEN 5 AND 12 THEN '5-12'
+          WHEN EXTRACT(YEAR FROM AGE("dateOfBirth")) BETWEEN 13 AND 17 THEN '13-17'
           ELSE '18+'
         END as age_group,
         COUNT(*) as count
       FROM children
-      WHERE is_active = true ${req.user.role === 'ngo' ? `AND registered_by = '${req.user.id}'` : ''}
+      WHERE "isActive" = true ${req.user.role === 'ngo' ? `AND "registeredBy" = '${req.user.id}'` : ''}
       GROUP BY age_group
     `, { type: Child.sequelize.QueryTypes.SELECT });
 
