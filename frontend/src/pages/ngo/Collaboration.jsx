@@ -82,6 +82,7 @@ const Collaboration = () => {
         <Typography variant="h4">Collaboration Requests</Typography>
         <Button
           variant="contained"
+          color="primary"
           startIcon={<AddIcon />}
           onClick={() => navigate('/ngo/collaboration/create')}
         >
