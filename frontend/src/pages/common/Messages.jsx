@@ -12,20 +12,120 @@ import {
   TextField,
   Button,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
 } from '@mui/material';
-import { Send as SendIcon } from '@mui/icons-material';
+import { Send as SendIcon, Edit as EditIcon } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const Messages = () => {
+  const { user } = useSelector((state) => state.auth);
   const [messages, setMessages] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [reply, setReply] = useState('');
   const [loading, setLoading] = useState(true);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [women, setWomen] = useState([]);
+  const [loadingWomen, setLoadingWomen] = useState(false);
+  const [composeData, setComposeData] = useState({
+    recipientId: '',
+    subject: '',
+    content: '',
+  });
+  const [composeError, setComposeError] = useState('');
+  const [composeSuccess, setComposeSuccess] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     fetchMessages();
   }, []);
+
+  useEffect(() => {
+    // Fetch women users when compose dialog opens (only for admin and NGO)
+    if (composeOpen && (user?.role === 'admin' || user?.role === 'ngo')) {
+      fetchWomen();
+    }
+  }, [composeOpen, user?.role]);
+
+  const fetchWomen = async () => {
+    setLoadingWomen(true);
+    try {
+      // Use general users endpoint (accessible to both admin and NGO)
+      const response = await api.get('/users?role=woman&isApproved=true&isActive=true&limit=100');
+      const users = response.data?.data || [];
+      setWomen(users);
+    } catch (error) {
+      console.error('Error fetching women users:', error);
+      setWomen([]);
+    } finally {
+      setLoadingWomen(false);
+    }
+  };
+
+  const handleOpenCompose = () => {
+    setComposeOpen(true);
+    setComposeData({ recipientId: '', subject: '', content: '' });
+    setComposeError('');
+    setComposeSuccess(false);
+  };
+
+  const handleCloseCompose = () => {
+    setComposeOpen(false);
+    setComposeData({ recipientId: '', subject: '', content: '' });
+    setComposeError('');
+    setComposeSuccess(false);
+  };
+
+  const handleComposeChange = (e) => {
+    const { name, value } = e.target;
+    setComposeData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSendNewMessage = async () => {
+    if (!composeData.recipientId || !composeData.subject.trim() || !composeData.content.trim()) {
+      setComposeError('Please fill in all fields');
+      return;
+    }
+
+    setSending(true);
+    setComposeError('');
+    setComposeSuccess(false);
+
+    try {
+      await api.post('/messages', {
+        recipientId: composeData.recipientId,
+        subject: composeData.subject,
+        content: composeData.content,
+        messageType: 'direct',
+        priority: 'normal',
+      });
+
+      setComposeSuccess(true);
+      // Refresh messages
+      await fetchMessages();
+      // Close dialog after a short delay
+      setTimeout(() => {
+        handleCloseCompose();
+      }, 1500);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setComposeError(error.response?.data?.message || 'Failed to send message');
+    } finally {
+      setSending(false);
+    }
+  };
 
   const fetchMessages = async () => {
     try {
@@ -87,11 +187,25 @@ const Messages = () => {
   // Extra safety check - ensure messages is always an array
   const messagesList = Array.isArray(messages) ? messages : [];
 
+  // Check if user can compose messages (admin or NGO only)
+  const canCompose = user?.role === 'admin' || user?.role === 'ngo';
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Messages
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          Messages
+        </Typography>
+        {canCompose && (
+          <Button
+            variant="contained"
+            startIcon={<EditIcon />}
+            onClick={handleOpenCompose}
+          >
+            Compose New Message
+          </Button>
+        )}
+      </Box>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid item xs={12} md={4}>
@@ -200,6 +314,85 @@ const Messages = () => {
           )}
         </Grid>
       </Grid>
+
+      {/* Compose New Message Dialog */}
+      <Dialog open={composeOpen} onClose={handleCloseCompose} maxWidth="sm" fullWidth>
+        <DialogTitle>Compose New Message</DialogTitle>
+        <DialogContent>
+          {composeError && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setComposeError('')}>
+              {composeError}
+            </Alert>
+          )}
+          {composeSuccess && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Message sent successfully!
+            </Alert>
+          )}
+
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>Select Recipient (Woman)</InputLabel>
+            <Select
+              name="recipientId"
+              value={composeData.recipientId}
+              onChange={handleComposeChange}
+              label="Select Recipient (Woman)"
+              disabled={loadingWomen || sending}
+            >
+              {loadingWomen ? (
+                <MenuItem disabled>Loading women users...</MenuItem>
+              ) : women.length === 0 ? (
+                <MenuItem disabled>No women users found</MenuItem>
+              ) : (
+                women.map((woman) => (
+                  <MenuItem key={woman.id} value={woman.id}>
+                    {`${woman.firstName || ''} ${woman.lastName || ''}`.trim() || woman.email}
+                    {woman.email && ` (${woman.email})`}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="normal"
+            required
+            name="subject"
+            label="Subject"
+            value={composeData.subject}
+            onChange={handleComposeChange}
+            disabled={sending}
+          />
+
+          <TextField
+            fullWidth
+            margin="normal"
+            required
+            name="content"
+            label="Message"
+            multiline
+            rows={6}
+            value={composeData.content}
+            onChange={handleComposeChange}
+            placeholder="Type your message here..."
+            disabled={sending}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCompose} disabled={sending}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSendNewMessage}
+            variant="contained"
+            startIcon={<SendIcon />}
+            disabled={sending || !composeData.recipientId || !composeData.subject.trim() || !composeData.content.trim()}
+          >
+            {sending ? 'Sending...' : 'Send Message'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
