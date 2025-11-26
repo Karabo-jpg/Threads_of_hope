@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { Box, Typography, Paper, TextField, Button, Grid, MenuItem } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, TextField, Button, Grid, MenuItem, Alert, CircularProgress } from '@mui/material';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
-const CreateProgram = () => {
+const EditProgram = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -13,7 +19,35 @@ const CreateProgram = () => {
     skillLevel: 'beginner',
     duration: '',
     maxParticipants: '',
+    status: 'draft',
   });
+
+  useEffect(() => {
+    fetchProgram();
+  }, [id]);
+
+  const fetchProgram = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/training/${id}`);
+      const program = response.data?.data || response.data;
+      
+      setFormData({
+        title: program.title || '',
+        description: program.description || '',
+        category: program.category || '',
+        skillLevel: program.skillLevel || 'beginner',
+        duration: program.duration || '',
+        maxParticipants: program.maxParticipants || '',
+        status: program.status || 'draft',
+      });
+    } catch (error) {
+      console.error('Error fetching program:', error);
+      setError('Failed to load program. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -24,33 +58,58 @@ const CreateProgram = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
+    setSuccess('');
+    setSaving(true);
     
     try {
       const programData = {
         ...formData,
         duration: parseInt(formData.duration),
-        maxParticipants: parseInt(formData.maxParticipants),
+        maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : null,
       };
       
-      await api.post('/training', programData);
-      alert('Training program created successfully!');
-      navigate('/training');
+      await api.put(`/training/${id}`, programData);
+      setSuccess('Program updated successfully!');
+      setTimeout(() => {
+        navigate('/ngo/training');
+      }, 1500);
     } catch (error) {
-      console.error('Error creating program:', error);
-      alert(error.response?.data?.message || 'Failed to create program');
+      console.error('Error updating program:', error);
+      setError(error.response?.data?.message || 'Failed to update program');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  if (loading) return <LoadingSpinner />;
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Create Training Program
-      </Typography>
+      <Box sx={{ mb: 3 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/ngo/training')}
+          sx={{ mb: 2 }}
+        >
+          Back to Programs
+        </Button>
+        <Typography variant="h4">Edit Training Program</Typography>
+      </Box>
 
-      <Paper sx={{ p: 3, mt: 3 }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          {success}
+        </Alert>
+      )}
+
+      <Paper sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -142,19 +201,39 @@ const CreateProgram = () => {
               />
             </Grid>
 
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                required
+                select
+                label="Status"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                helperText="Set to 'active' to allow enrollments"
+              >
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="full">Full</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </TextField>
+            </Grid>
+
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={loading}
+                  disabled={saving}
+                  sx={{ minWidth: 150 }}
                 >
-                  {loading ? 'Creating...' : 'Create Program'}
+                  {saving ? <CircularProgress size={24} /> : 'Update Program'}
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => navigate('/ngo/training')}
-                  disabled={loading}
+                  disabled={saving}
                 >
                   Cancel
                 </Button>
@@ -167,5 +246,5 @@ const CreateProgram = () => {
   );
 };
 
-export default CreateProgram;
+export default EditProgram;
 

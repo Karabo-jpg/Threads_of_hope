@@ -16,6 +16,7 @@ import Children from './pages/ngo/Children';
 import RegisterChild from './pages/ngo/RegisterChild';
 import Training from './pages/ngo/Training';
 import CreateProgram from './pages/ngo/CreateProgram';
+import EditProgram from './pages/ngo/EditProgram';
 import NGODonations from './pages/ngo/NGODonations';
 import Collaboration from './pages/ngo/Collaboration';
 import CreateCollaboration from './pages/ngo/CreateCollaboration';
@@ -87,6 +88,7 @@ function App() {
           <Route path="children/register" element={<RegisterChild />} />
           <Route path="training" element={<Training />} />
           <Route path="training/create" element={<CreateProgram />} />
+          <Route path="training/edit/:id" element={<EditProgram />} />
           <Route path="donations" element={<NGODonations />} />
           <Route path="collaboration" element={<Collaboration />} />
           <Route path="collaboration/create" element={<CreateCollaboration />} />
