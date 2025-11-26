@@ -57,28 +57,24 @@ const seedTestAccounts = async () => {
     for (const accountData of testAccounts) {
       const { plainPassword, ...accountInfo } = accountData;
       
-      // Hash password
-      const hashedPassword = await bcrypt.hash(plainPassword, 10);
-      
       const existingUser = await User.findOne({ where: { email: accountInfo.email } });
       
       if (existingUser) {
-        // Update existing user with correct password hash and ensure they're approved
-        await existingUser.update({
-          password: hashedPassword, // Update password hash
-          isActive: true,
-          isApproved: true,
-          emailVerified: true,
-          role: accountInfo.role, // Ensure role is correct
-          firstName: accountInfo.firstName,
-          lastName: accountInfo.lastName,
-        });
+        // Update existing user - pass plain password, let model hooks hash it
+        existingUser.set('password', plainPassword); // Set plain password - hook will hash it
+        existingUser.set('isActive', true);
+        existingUser.set('isApproved', true);
+        existingUser.set('emailVerified', true);
+        existingUser.set('role', accountInfo.role);
+        existingUser.set('firstName', accountInfo.firstName);
+        existingUser.set('lastName', accountInfo.lastName);
+        await existingUser.save(); // Save triggers beforeUpdate hook
         console.log(`✅ Updated: ${accountInfo.email} (${accountInfo.role}) - Password reset`);
       } else {
-        // Create new user with hashed password
+        // Create new user - pass plain password, let model hooks hash it
         await User.create({
           ...accountInfo,
-          password: hashedPassword,
+          password: plainPassword, // Plain password - hook will hash it
         });
         console.log(`✅ Created: ${accountInfo.email} (${accountInfo.role})`);
       }
