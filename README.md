@@ -10,6 +10,12 @@ A secure, cross-platform web and mobile application for coordinating child welfa
 
 The repository contains all source code, configuration files, and documentation needed to run the application locally or deploy it to production.
 
+## 🌐 Live Application
+
+**Try the application online:**
+- **Frontend URL**: https://threads-of-hope-ten.vercel.app
+- The application is deployed and accessible at the above URL
+
 ## 🌟 Overview
 
 **Threads of Hope** enables:
