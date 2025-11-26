@@ -57,7 +57,7 @@ The repository contains all source code, configuration files, and documentation 
 
 ### Backend
 - **Framework**: Node.js with Express
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL (hosted on Supabase)
 - **ORM**: Sequelize
 - **Authentication**: JWT, Passport.js
 - **API Documentation**: Swagger/OpenAPI
@@ -126,9 +126,11 @@ Before you begin, ensure you have the following installed on your computer:
    - Verify installation by running: `node --version` (should show v18.x or higher)
    - Verify npm is installed: `npm --version`
 
-2. **PostgreSQL** (version 14.x or higher) OR **Supabase Account** (free cloud database)
-   - PostgreSQL: Download from https://www.postgresql.org/download/
-   - OR use Supabase (recommended for quick setup): https://supabase.com (free tier available)
+2. **Supabase Account** (free cloud PostgreSQL database) - **REQUIRED**
+   - This project uses Supabase as its database
+   - Sign up for a free account at: https://supabase.com
+   - Free tier includes: 500MB database, 2GB bandwidth, 50,000 monthly active users
+   - **Note**: You can use local PostgreSQL if preferred, but Supabase is recommended and easier to set up
 
 3. **Git** (to clone the repository)
    - Download from: https://git-scm.com/downloads
@@ -178,28 +180,48 @@ Before you begin, ensure you have the following installed on your computer:
      cp .env.example .env
      ```
 
-4. **Configure your database connection**
+4. **Configure your database connection (Supabase)**
+   - **This project is configured to use Supabase by default**
    - Open the `.env` file in a text editor (Notepad, VS Code, etc.)
-   - **If using Supabase (recommended):**
-     - Sign up at https://supabase.com (free)
-     - Create a new project
-     - Go to Project Settings > Database
-     - Copy your connection details and update these variables in `.env`:
+   - **Set up Supabase:**
+     1. Go to https://supabase.com and sign up (free account)
+     2. Click "New Project"
+     3. Choose an organization (or create one)
+     4. Fill in project details:
+        - Name: `threads-of-hope` (or any name)
+        - Database Password: Create a strong password (save this!)
+        - Region: Choose closest to you
+     5. Wait 2-3 minutes for project to be created
+     6. Once created, go to **Project Settings** (gear icon) > **Database**
+     7. Find the **Connection string** section
+     8. Copy your connection details and update these variables in `backend/.env`:
+        ```
+        DB_HOST=db.xxxxxxxxxxxxx.supabase.co
+        DB_PORT=5432
+        DB_NAME=postgres
+        DB_USER=postgres
+        DB_PASSWORD=your-supabase-database-password
+        ```
+     - **Example `.env` file:**
        ```
-       DB_HOST=your-supabase-host.supabase.co
+       DB_HOST=db.abcdefghijklmnop.supabase.co
        DB_PORT=5432
        DB_NAME=postgres
        DB_USER=postgres
-       DB_PASSWORD=your-supabase-password
+       DB_PASSWORD=MySecurePassword123!
+       JWT_SECRET=mySecretKey123!@#
+       FRONTEND_URL=http://localhost:3000
        ```
-   - **If using local PostgreSQL:**
-     - Update these variables in `.env`:
+   - **Alternative: Using Local PostgreSQL** (if you prefer):
+     - Install PostgreSQL from https://www.postgresql.org/download/
+     - Create a database named `threadsofhope`
+     - Update `.env` with:
        ```
        DB_HOST=localhost
        DB_PORT=5432
        DB_NAME=threadsofhope
        DB_USER=postgres
-       DB_PASSWORD=your-postgres-password
+       DB_PASSWORD=your-local-postgres-password
        ```
    - **Set JWT secret** (any random string, e.g., `mySecretKey123!@#`):
      ```
