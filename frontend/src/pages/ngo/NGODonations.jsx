@@ -14,9 +14,13 @@ const NGODonations = () => {
   const fetchDonations = async () => {
     try {
       const response = await api.get('/donations');
-      setDonations(response.data.data.donations || []);
+      console.log('Donations API response:', response.data);
+      // Handle different response structures
+      const data = response.data?.data || response.data;
+      setDonations(data?.donations || data || []);
     } catch (error) {
       console.error('Error fetching donations:', error);
+      setDonations([]);
     } finally {
       setLoading(false);
     }

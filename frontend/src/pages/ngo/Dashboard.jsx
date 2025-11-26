@@ -141,6 +141,11 @@ const NGODashboard = () => {
                 </Button>
               </Grid>
               <Grid item>
+                <Button variant="outlined" onClick={() => navigate('/ngo/donations')}>
+                  View Donations
+                </Button>
+              </Grid>
+              <Grid item>
                 <Button variant="outlined" onClick={() => navigate('/ngo/collaboration')}>
                   Collaboration Requests
                 </Button>
