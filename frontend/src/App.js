@@ -20,6 +20,7 @@ import NGODonations from './pages/ngo/NGODonations';
 import Collaboration from './pages/ngo/Collaboration';
 import CreateCollaboration from './pages/ngo/CreateCollaboration';
 import WomanDashboard from './pages/woman/Dashboard';
+import TrainingPrograms from './pages/woman/TrainingPrograms';
 import DonorDashboard from './pages/donor/Dashboard';
 import Donations from './pages/donor/Donations';
 import NewDonation from './pages/donor/NewDonation';
@@ -94,6 +95,7 @@ function App() {
         {/* Woman routes */}
         <Route path="woman" element={<PrivateRoute roles={['woman']} />}>
           <Route index element={<WomanDashboard />} />
+          <Route path="training" element={<TrainingPrograms />} />
         </Route>
         
         {/* Donor routes */}

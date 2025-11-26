@@ -100,7 +100,7 @@ const WomanDashboard = () => {
               <Typography variant="h6">Active Programs</Typography>
               <Button
                 variant="contained"
-                onClick={() => navigate('/training')}
+                onClick={() => navigate('/woman/training')}
               >
                 Browse Programs
               </Button>
