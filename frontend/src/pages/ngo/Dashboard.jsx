@@ -26,16 +26,24 @@ const NGODashboard = () => {
         api.get('/donations/statistics'),
       ]);
       
-      console.log('Children Stats:', childrenRes.data.data);
-      console.log('Donations Stats:', donationsRes.data.data);
+      console.log('Children Stats:', childrenRes.data);
+      console.log('Donations Stats:', donationsRes.data);
+      
+      // Handle different response structures
+      const childrenData = childrenRes.data?.data || childrenRes.data || {};
+      const donationsData = donationsRes.data?.data || donationsRes.data || {};
       
       setStats({
-        children: childrenRes.data.data,
-        donations: donationsRes.data.data,
+        children: childrenData,
+        donations: donationsData,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
       console.error('Error details:', error.response?.data);
+      setStats({
+        children: { totalChildren: 0 },
+        donations: { donationCount: 0, totalDonations: 0 },
+      });
     } finally {
       setLoading(false);
     }
@@ -53,7 +61,7 @@ const NGODashboard = () => {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/children/register')}
+            onClick={() => navigate('/ngo/children/register')}
           >
             Register Child
           </Button>
@@ -61,7 +69,7 @@ const NGODashboard = () => {
             variant="contained"
             color="secondary"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/training/create')}
+            onClick={() => navigate('/ngo/training/create')}
           >
             Create Program
           </Button>
@@ -123,17 +131,17 @@ const NGODashboard = () => {
             </Typography>
             <Grid container spacing={2}>
               <Grid item>
-                <Button variant="outlined" onClick={() => navigate('/children')}>
+                <Button variant="outlined" onClick={() => navigate('/ngo/children')}>
                   View All Children
                 </Button>
               </Grid>
               <Grid item>
-                <Button variant="outlined" onClick={() => navigate('/training')}>
+                <Button variant="outlined" onClick={() => navigate('/ngo/training')}>
                   Manage Programs
                 </Button>
               </Grid>
               <Grid item>
-                <Button variant="outlined" onClick={() => navigate('/collaboration')}>
+                <Button variant="outlined" onClick={() => navigate('/ngo/collaboration')}>
                   Collaboration Requests
                 </Button>
               </Grid>

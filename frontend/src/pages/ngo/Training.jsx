@@ -18,9 +18,12 @@ const Training = () => {
     try {
       const response = await api.get('/training');
       console.log('Training API response:', response.data);
-      setPrograms(response.data.data.programs || []);
+      // Handle different response structures
+      const data = response.data?.data || response.data;
+      setPrograms(data?.programs || data || []);
     } catch (error) {
       console.error('Error fetching programs:', error);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,7 @@ const Training = () => {
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          onClick={() => navigate('/training/create')}
+          onClick={() => navigate('/ngo/training/create')}
         >
           Create Program
         </Button>

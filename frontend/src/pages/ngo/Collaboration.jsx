@@ -35,12 +35,15 @@ const Collaboration = () => {
     try {
       setLoading(true);
       const response = await api.get('/collaboration');
+      console.log('Collaboration API response:', response.data);
+      // Handle different response structures
       const data = response.data?.data || response.data;
       setCollaborations(data?.collaborations || data || []);
       setError('');
     } catch (err) {
       console.error('Error fetching collaborations:', err);
-      setError('Failed to load collaboration requests');
+      setError(err.response?.data?.message || 'Failed to load collaboration requests');
+      setCollaborations([]);
     } finally {
       setLoading(false);
     }
@@ -150,13 +153,18 @@ const Collaboration = () => {
                 <CardActions>
                   <Button
                     size="small"
-                    onClick={() => navigate(`/ngo/collaboration/${collab.id}`)}
+                    onClick={() => {
+                      // For now, just show an alert. Can be expanded to a detail page later
+                      alert(`Collaboration Details:\n\nTitle: ${collab.title}\n\nDescription: ${collab.description}\n\nType: ${formatType(collab.collaborationType)}\n\nStatus: ${collab.status}`);
+                    }}
                   >
                     View Details
                   </Button>
-                  <Button size="small" color="primary">
-                    Respond
-                  </Button>
+                  {collab.status === 'open' && (
+                    <Button size="small" color="primary">
+                      Respond
+                    </Button>
+                  )}
                 </CardActions>
               </Card>
             </Grid>

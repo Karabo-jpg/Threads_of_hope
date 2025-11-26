@@ -18,9 +18,12 @@ const Children = () => {
     try {
       const response = await api.get('/children');
       console.log('Children API response:', response.data);
-      setChildren(response.data.data.children || []);
+      // Handle different response structures
+      const data = response.data?.data || response.data;
+      setChildren(data?.children || data || []);
     } catch (error) {
       console.error('Error fetching children:', error);
+      setChildren([]);
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,7 @@ const Children = () => {
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          onClick={() => navigate('/children/register')}
+          onClick={() => navigate('/ngo/children/register')}
         >
           Register Child
         </Button>
