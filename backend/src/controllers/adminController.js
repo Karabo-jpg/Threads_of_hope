@@ -82,7 +82,7 @@ exports.getDashboardStats = async (req, res, next) => {
           activePrograms,
           totalEnrollments,
           completedEnrollments,
-          completionRate: totalEnrollments > 0 ? ((completedEnrollments / totalEnrollments) * 100).toFixed(2) : 0,
+          completionRate: totalEnrollments > 0 ? parseFloat(((completedEnrollments / totalEnrollments) * 100).toFixed(2)) : 0,
         },
         growth: growthData,
       },
