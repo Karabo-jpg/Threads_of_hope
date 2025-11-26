@@ -1,4 +1,4 @@
-const { TrainingProgram, Enrollment, User, Badge, UserBadge } = require('../models');
+const { TrainingProgram, Enrollment, User, Badge, UserBadge, Message } = require('../models');
 const { Op } = require('sequelize');
 const { createNotification } = require('../services/notificationService');
 const { sendEnrollmentNotificationEmail } = require('../services/emailService');
@@ -243,6 +243,21 @@ exports.enrollInProgram = async (req, res, next) => {
 
       await program.increment('currentParticipants');
 
+      // Get program creator for message sender
+      const programCreator = await User.findByPk(program.createdBy);
+
+      // Send message to woman
+      await Message.create({
+        senderId: program.createdBy,
+        recipientId: req.user.id,
+        subject: `Enrollment Approved: ${program.title}`,
+        content: `Congratulations! Your enrollment in "${program.title}" has been approved. You can now start your training journey.\n\nProgram Details:\n- Duration: ${program.duration} days\n- Category: ${program.category}\n- Skill Level: ${program.skillLevel}\n\nLog in to your dashboard to get started!`,
+        messageType: 'notification',
+        relatedTo: enrollment.id,
+        relatedType: 'enrollment',
+        priority: 'normal',
+      });
+
       // Send notification
       await createNotification(
         req.user.id,
@@ -335,9 +350,10 @@ exports.updateEnrollmentProgress = async (req, res, next) => {
         completionDate: new Date(),
       });
 
-      // Issue certificate
+      // Get program details
       const program = await TrainingProgram.findByPk(enrollment.programId);
-      if (program.certificationProvided) {
+      
+      if (program && program.certificationProvided) {
         await enrollment.update({
           certificateIssued: true,
           certificateIssuedDate: new Date(),
@@ -358,6 +374,18 @@ exports.updateEnrollmentProgress = async (req, res, next) => {
           });
         }
 
+        // Send message to woman
+        await Message.create({
+          senderId: program.createdBy || req.user.id,
+          recipientId: req.user.id,
+          subject: `Training Completed: ${program.title}`,
+          content: `Congratulations! You have successfully completed "${program.title}" and earned a certificate.\n\nYour dedication and hard work have paid off. You can now download your certificate from your dashboard.\n\nKeep up the great work!`,
+          messageType: 'notification',
+          relatedTo: enrollment.id,
+          relatedType: 'enrollment',
+          priority: 'high',
+        });
+
         // Send notification
         await createNotification(
           req.user.id,
@@ -368,6 +396,32 @@ exports.updateEnrollmentProgress = async (req, res, next) => {
             relatedTo: enrollment.id,
             relatedType: 'enrollment',
             actionUrl: `/training/certificate/${enrollment.id}`,
+            deliveryChannels: ['in_app', 'email'],
+          }
+        );
+      } else if (program) {
+        // Training completed but no certificate - still send message
+        await Message.create({
+          senderId: program.createdBy || req.user.id,
+          recipientId: req.user.id,
+          subject: `Training Completed: ${program.title}`,
+          content: `Congratulations! You have successfully completed "${program.title}".\n\nYour dedication and hard work have paid off. Keep up the great work!`,
+          messageType: 'notification',
+          relatedTo: enrollment.id,
+          relatedType: 'enrollment',
+          priority: 'high',
+        });
+
+        // Send notification
+        await createNotification(
+          req.user.id,
+          'training_completed',
+          'Training Completed!',
+          `Congratulations! You've completed ${program.title}.`,
+          {
+            relatedTo: enrollment.id,
+            relatedType: 'enrollment',
+            actionUrl: `/training/${program.id}`,
             deliveryChannels: ['in_app', 'email'],
           }
         );
@@ -427,6 +481,31 @@ exports.updateEnrollmentStatus = async (req, res, next) => {
 
     if (status === 'approved') {
       await enrollment.program.increment('currentParticipants');
+    }
+
+    // Send message to woman
+    if (status === 'approved') {
+      await Message.create({
+        senderId: req.user.id,
+        recipientId: enrollment.userId,
+        subject: `Enrollment Approved: ${enrollment.program.title}`,
+        content: `Great news! Your enrollment in "${enrollment.program.title}" has been approved.\n\nProgram Details:\n- Duration: ${enrollment.program.duration} days\n- Category: ${enrollment.program.category}\n- Skill Level: ${enrollment.program.skillLevel}\n${enrollment.program.startDate ? `- Start Date: ${new Date(enrollment.program.startDate).toLocaleDateString()}\n` : ''}\nYou can now start your training journey. Log in to your dashboard to get started!${notes ? `\n\nNotes: ${notes}` : ''}`,
+        messageType: 'notification',
+        relatedTo: enrollment.id,
+        relatedType: 'enrollment',
+        priority: 'normal',
+      });
+    } else if (status === 'rejected') {
+      await Message.create({
+        senderId: req.user.id,
+        recipientId: enrollment.userId,
+        subject: `Enrollment Update: ${enrollment.program.title}`,
+        content: `We regret to inform you that your enrollment in "${enrollment.program.title}" has been ${status}.\n\n${notes ? `Reason: ${notes}\n\n` : ''}If you have any questions or would like to discuss this decision, please feel free to contact us.`,
+        messageType: 'notification',
+        relatedTo: enrollment.id,
+        relatedType: 'enrollment',
+        priority: 'normal',
+      });
     }
 
     // Send notification
