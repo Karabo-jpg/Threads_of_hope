@@ -12,6 +12,15 @@ import {
   Grid,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -26,6 +35,14 @@ const Collaboration = () => {
   const [collaborations, setCollaborations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [respondDialogOpen, setRespondDialogOpen] = useState(false);
+  const [selectedCollaboration, setSelectedCollaboration] = useState(null);
+  const [responding, setResponding] = useState(false);
+  const [responseData, setResponseData] = useState({
+    response: 'interested',
+    message: '',
+  });
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     fetchCollaborations();
@@ -70,6 +87,55 @@ const Collaboration = () => {
 
   const formatType = (type) => {
     return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  const handleRespondClick = (collab) => {
+    setSelectedCollaboration(collab);
+    setResponseData({ response: 'interested', message: '' });
+    setRespondDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setRespondDialogOpen(false);
+    setSelectedCollaboration(null);
+    setResponseData({ response: 'interested', message: '' });
+    setError('');
+    setSuccess('');
+  };
+
+  const handleResponseChange = (e) => {
+    setResponseData({
+      ...responseData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmitResponse = async () => {
+    if (!responseData.message.trim()) {
+      setError('Please provide a message');
+      return;
+    }
+
+    try {
+      setResponding(true);
+      setError('');
+      await api.post(`/collaboration/${selectedCollaboration.id}/respond`, {
+        response: responseData.response,
+        message: responseData.message,
+      });
+      setSuccess('Response submitted successfully!');
+      // Refresh collaborations list
+      await fetchCollaborations();
+      // Close dialog after 1.5 seconds
+      setTimeout(() => {
+        handleCloseDialog();
+      }, 1500);
+    } catch (err) {
+      console.error('Error submitting response:', err);
+      setError(err.response?.data?.message || 'Failed to submit response. Please try again.');
+    } finally {
+      setResponding(false);
+    }
   };
 
   if (loading) {
@@ -161,7 +227,11 @@ const Collaboration = () => {
                     View Details
                   </Button>
                   {collab.status === 'open' && (
-                    <Button size="small" color="primary">
+                    <Button 
+                      size="small" 
+                      color="primary"
+                      onClick={() => handleRespondClick(collab)}
+                    >
                       Respond
                     </Button>
                   )}
@@ -171,6 +241,83 @@ const Collaboration = () => {
           ))}
         </Grid>
       )}
+
+      {/* Respond Dialog */}
+      <Dialog 
+        open={respondDialogOpen} 
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Respond to Collaboration Request
+        </DialogTitle>
+        <DialogContent>
+          {selectedCollaboration && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Collaboration:
+              </Typography>
+              <Typography variant="h6" gutterBottom>
+                {selectedCollaboration.title}
+              </Typography>
+            </Box>
+          )}
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
+
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>Response Type</InputLabel>
+            <Select
+              name="response"
+              value={responseData.response}
+              onChange={handleResponseChange}
+              label="Response Type"
+            >
+              <MenuItem value="interested">Interested</MenuItem>
+              <MenuItem value="not_interested">Not Interested</MenuItem>
+              <MenuItem value="need_more_info">Need More Information</MenuItem>
+              <MenuItem value="conditional">Conditional Interest</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Your Message"
+            name="message"
+            value={responseData.message}
+            onChange={handleResponseChange}
+            required
+            multiline
+            rows={4}
+            placeholder="Share your thoughts, questions, or conditions for collaboration..."
+            helperText="Please provide details about your interest or any questions you have"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} disabled={responding}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmitResponse} 
+            variant="contained"
+            disabled={responding || !responseData.message.trim()}
+          >
+            {responding ? <CircularProgress size={24} /> : 'Submit Response'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
