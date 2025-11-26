@@ -37,13 +37,16 @@ const TrainingPrograms = () => {
       const response = await api.get('/training', {
         params: { status: 'active' },
       });
-      // Some backends wrap data differently; support both
-      const data = response.data?.data || response.data;
-      setPrograms(Array.isArray(data) ? data : data?.programs || []);
+      // Backend returns: { success: true, data: { programs: [...], pagination: {...} } }
+      const responseData = response.data?.data || response.data;
+      const programsList = responseData?.programs || responseData;
+      setPrograms(Array.isArray(programsList) ? programsList : []);
       setError('');
     } catch (err) {
       console.error('Error fetching training programs:', err);
-      setError('Failed to load training programs. Please try again.');
+      const errorMsg = err.response?.data?.message || 'Failed to load training programs. Please try again.';
+      setError(errorMsg);
+      setPrograms([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
