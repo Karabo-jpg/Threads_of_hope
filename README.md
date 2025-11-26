@@ -422,10 +422,6 @@ The application supports:
 
 This project follows Agile Scrum methodology. Please read our contribution guidelines before submitting PRs.
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
 ## 📧 Support
 
 For support, email support@threadsofhope.org
