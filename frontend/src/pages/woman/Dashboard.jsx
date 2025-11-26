@@ -21,9 +21,12 @@ const WomanDashboard = () => {
   const fetchEnrollments = async () => {
     try {
       const response = await api.get('/training/my-enrollments');
-      setEnrollments(response.data.data);
+      // Handle different response structures
+      const data = response.data?.data || response.data || [];
+      setEnrollments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
+      setEnrollments([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -31,8 +34,10 @@ const WomanDashboard = () => {
 
   if (loading) return <LoadingSpinner />;
 
-  const activeEnrollments = enrollments.filter(e => ['active', 'approved'].includes(e.status));
-  const completedEnrollments = enrollments.filter(e => e.status === 'completed');
+  // Ensure enrollments is always an array
+  const enrollmentsList = Array.isArray(enrollments) ? enrollments : [];
+  const activeEnrollments = enrollmentsList.filter(e => e && ['active', 'approved'].includes(e.status));
+  const completedEnrollments = enrollmentsList.filter(e => e && e.status === 'completed');
 
   return (
     <Box>
@@ -81,7 +86,7 @@ const WomanDashboard = () => {
                   <Typography variant="h4">
                     {activeEnrollments.length > 0
                       ? Math.round(
-                          activeEnrollments.reduce((sum, e) => sum + (e.progress || 0), 0) /
+                          activeEnrollments.reduce((sum, e) => sum + (Number(e.progress) || 0), 0) /
                             activeEnrollments.length
                         )
                       : 0}
@@ -118,12 +123,12 @@ const WomanDashboard = () => {
                       {enrollment.program?.title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {enrollment.progress || 0}%
+                      {Number(enrollment.progress) || 0}%
                     </Typography>
                   </Box>
                   <LinearProgress
                     variant="determinate"
-                    value={enrollment.progress || 0}
+                    value={Number(enrollment.progress) || 0}
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                 </Box>

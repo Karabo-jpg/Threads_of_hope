@@ -24,6 +24,7 @@ const TrainingPrograms = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [enrollingId, setEnrollingId] = useState(null);
 
   useEffect(() => {
@@ -52,9 +53,13 @@ const TrainingPrograms = () => {
     try {
       setEnrollingId(programId);
       setError('');
+      setSuccess('');
       await api.post(`/training/${programId}/enroll`);
-      // After successful enrollment, refresh enrollments stats by reloading dashboard later
+      setSuccess('Successfully enrolled in program!');
+      // Refresh programs list
       await fetchPrograms();
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Error enrolling in program:', err);
       const message =
@@ -90,8 +95,14 @@ const TrainingPrograms = () => {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
           {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
+          {success}
         </Alert>
       )}
 
@@ -137,10 +148,7 @@ const TrainingPrograms = () => {
                     </Typography>
                   )}
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                  <Button size="small" onClick={() => navigate(`/training/${program.id}`)}>
-                    View Details
-                  </Button>
+                <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
                   <Button
                     size="small"
                     variant="contained"
