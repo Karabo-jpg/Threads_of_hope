@@ -422,10 +422,6 @@ The application supports:
 
 This project follows Agile Scrum methodology. Please read our contribution guidelines before submitting PRs.
 
-## 📧 Support
-
-For support, email support@threadsofhope.org
-
 ## 🙏 Acknowledgments
 
 Built to empower communities in Sub-Saharan Africa through technology and collaboration.
