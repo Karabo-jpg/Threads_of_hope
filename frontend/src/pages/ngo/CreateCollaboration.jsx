@@ -14,7 +14,7 @@ import {
   Select,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axiosInstance from '../../utils/axiosInstance';
+import api from '../../services/api';
 
 const CreateCollaboration = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const CreateCollaboration = () => {
 
     try {
       setLoading(true);
-      await axiosInstance.post('/api/collaboration', formData);
+      await api.post('/collaboration', formData);
       setSuccess(true);
       setTimeout(() => {
         navigate('/ngo/collaboration');

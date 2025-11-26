@@ -19,7 +19,7 @@ import {
   Event as EventIcon,
   Assessment as AssessmentIcon,
 } from '@mui/icons-material';
-import axiosInstance from '../../utils/axiosInstance';
+import api from '../../services/api';
 
 const Collaboration = () => {
   const navigate = useNavigate();
@@ -34,8 +34,9 @@ const Collaboration = () => {
   const fetchCollaborations = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/collaboration');
-      setCollaborations(response.data.data.collaborations || []);
+      const response = await api.get('/collaboration');
+      const data = response.data?.data || response.data;
+      setCollaborations(data?.collaborations || data || []);
       setError('');
     } catch (err) {
       console.error('Error fetching collaborations:', err);
