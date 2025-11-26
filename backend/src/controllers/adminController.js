@@ -49,10 +49,10 @@ exports.getDashboardStats = async (req, res, next) => {
     // Growth trends (last 12 months)
     const growthData = await User.sequelize.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') as month,
+        TO_CHAR("createdAt", 'YYYY-MM') as month,
         COUNT(*) as new_users
       FROM users
-      WHERE created_at >= NOW() - INTERVAL '12 months'
+      WHERE "createdAt" >= NOW() - INTERVAL '12 months'
       GROUP BY month
       ORDER BY month DESC
     `, { type: User.sequelize.QueryTypes.SELECT });

@@ -47,9 +47,20 @@ const AdminDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       const response = await api.get('/admin/dashboard/stats');
-      setStats(response.data.data);
+      console.log('Admin Dashboard Stats Response:', response.data);
+      // Handle different response structures
+      const data = response.data?.data || response.data || {};
+      setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Error fetching admin stats:', error);
+      console.error('Error details:', error.response?.data);
+      // Set default stats on error
+      setStats({
+        users: { total: 0, pendingApprovals: 0 },
+        children: { total: 0 },
+        donations: { total: 0, allocated: 0 },
+        training: { activePrograms: 0, completionRate: 0 },
+      });
     } finally {
       setLoading(false);
     }
@@ -86,7 +97,10 @@ const AdminDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Donations"
-            value={`$${stats?.donations?.total?.toLocaleString() || 0}`}
+            value={`$${parseFloat(stats?.donations?.total || 0).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`}
             icon={FavoriteIcon}
             color="error"
           />
@@ -119,7 +133,7 @@ const AdminDashboard = () => {
                   Completion Rate
                 </Typography>
                 <Typography variant="h5">
-                  {stats?.training?.completionRate || 0}%
+                  {parseFloat(stats?.training?.completionRate || 0).toFixed(1)}%
                 </Typography>
               </Grid>
               <Grid item xs={12} md={4}>
@@ -127,7 +141,10 @@ const AdminDashboard = () => {
                   Funds Allocated
                 </Typography>
                 <Typography variant="h5">
-                  ${stats?.donations?.allocated?.toLocaleString() || 0}
+                  ${parseFloat(stats?.donations?.allocated || 0).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
                 </Typography>
               </Grid>
             </Grid>
