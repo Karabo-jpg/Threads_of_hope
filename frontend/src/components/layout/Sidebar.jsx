@@ -60,7 +60,7 @@ const Sidebar = () => {
       ],
       woman: [
         ...commonItems,
-        { text: t('nav.training'), icon: <SchoolIcon />, path: '/woman/training' },
+        { text: t('nav.training'), icon: <SchoolIcon />, path: '/training' },
       ],
       donor: [
         { text: t('nav.dashboard'), icon: <DashboardIcon />, path: '/donor' },
