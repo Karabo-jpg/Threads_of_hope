@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const { sequelize } = require('./config/database');
 
 // Server configuration
+// Port configuration for production and development
 const PORT = process.env.PORT || 5000;
 
 // Create HTTP server
