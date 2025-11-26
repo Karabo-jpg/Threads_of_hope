@@ -208,11 +208,19 @@ const WomanDashboard = () => {
                       </Typography>
                       <Tooltip title="Update Progress">
                         <IconButton
-                          size="small"
+                          size="medium"
                           color="primary"
                           onClick={() => handleOpenProgressDialog(enrollment)}
+                          sx={{ 
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                            '&:hover': {
+                              bgcolor: 'primary.light',
+                              color: 'white',
+                            }
+                          }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon />
                         </IconButton>
                       </Tooltip>
                     </Box>
