@@ -32,25 +32,15 @@ const Messages = () => {
       const response = await api.get('/messages');
       console.log('Messages API response:', response.data);
       
-      // Handle different response formats - ensure we always set an array
-      let messagesData = [];
+      // Backend returns: { success: true, data: { messages: [...], pagination: {...} } }
+      const data = response.data?.data || response.data;
+      const messagesData = data?.messages || data || [];
       
-      if (response.data) {
-        if (Array.isArray(response.data)) {
-          messagesData = response.data;
-        } else if (response.data.data) {
-          if (Array.isArray(response.data.data)) {
-            messagesData = response.data.data;
-          } else if (response.data.data.messages && Array.isArray(response.data.data.messages)) {
-            messagesData = response.data.data.messages;
-          }
-        } else if (response.data.messages && Array.isArray(response.data.messages)) {
-          messagesData = response.data.messages;
-        }
-      }
+      // Ensure messages is always an array
+      const messagesList = Array.isArray(messagesData) ? messagesData : [];
       
-      console.log('Setting messages to:', messagesData);
-      setMessages(messagesData);
+      console.log('Setting messages to:', messagesList);
+      setMessages(messagesList);
     } catch (error) {
       console.error('Error fetching messages:', error);
       console.error('Error details:', error.response?.data);
@@ -64,15 +54,31 @@ const Messages = () => {
     if (!reply.trim() || !selectedMessage) return;
 
     try {
+      const senderId = selectedMessage.senderId || selectedMessage.sender?.id;
+      if (!senderId) {
+        console.error('Cannot send reply: sender ID not found');
+        return;
+      }
+
       await api.post('/messages', {
-        recipientId: selectedMessage.senderId,
-        subject: `RE: ${selectedMessage.subject}`,
+        recipientId: senderId,
+        subject: `RE: ${selectedMessage.subject || 'Message'}`,
         content: reply,
       });
       setReply('');
-      fetchMessages();
+      // Refresh messages after sending
+      await fetchMessages();
+      // Mark current message as read if not already
+      if (!selectedMessage.isRead && selectedMessage.id) {
+        try {
+          await api.put(`/messages/${selectedMessage.id}/read`);
+        } catch (err) {
+          console.error('Error marking message as read:', err);
+        }
+      }
     } catch (error) {
       console.error('Error sending reply:', error);
+      console.error('Error details:', error.response?.data);
     }
   };
 
@@ -108,7 +114,9 @@ const Messages = () => {
                     >
                       <ListItemAvatar>
                         <Avatar>
-                          {message.senderName?.charAt(0) || 'U'}
+                          {message.sender?.firstName?.charAt(0) || 
+                           message.senderName?.charAt(0) || 
+                           'U'}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
@@ -116,10 +124,17 @@ const Messages = () => {
                         secondary={
                           <React.Fragment>
                             <Typography variant="body2" component="span">
-                              {message.senderName || 'Unknown Sender'}
+                              {message.sender 
+                                ? `${message.sender.firstName || ''} ${message.sender.lastName || ''}`.trim() || message.sender.email
+                                : message.senderName || 'Unknown Sender'}
                             </Typography>
                             <br />
                             {new Date(message.createdAt).toLocaleDateString()}
+                            {!message.isRead && (
+                              <Typography variant="caption" color="primary" sx={{ ml: 1 }}>
+                                (Unread)
+                              </Typography>
+                            )}
                           </React.Fragment>
                         }
                       />
@@ -139,9 +154,17 @@ const Messages = () => {
                 {selectedMessage.subject}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                From: {selectedMessage.senderName || 'Unknown'}
+                From: {selectedMessage.sender 
+                  ? `${selectedMessage.sender.firstName || ''} ${selectedMessage.sender.lastName || ''}`.trim() || selectedMessage.sender.email
+                  : selectedMessage.senderName || 'Unknown'}
                 <br />
                 Date: {new Date(selectedMessage.createdAt).toLocaleString()}
+                {selectedMessage.messageType && (
+                  <>
+                    <br />
+                    Type: {selectedMessage.messageType}
+                  </>
+                )}
               </Typography>
               <Divider sx={{ my: 2 }} />
               <Typography variant="body1" paragraph>
