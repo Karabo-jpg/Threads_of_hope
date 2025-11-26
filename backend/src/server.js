@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { sequelize } = require('./config/database');
 
+// Server configuration
 const PORT = process.env.PORT || 5000;
 
 // Create HTTP server
