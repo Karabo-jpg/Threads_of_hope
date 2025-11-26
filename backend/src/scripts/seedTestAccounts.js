@@ -10,12 +10,11 @@ const seedTestAccounts = async () => {
     await sequelize.authenticate();
     console.log('✅ Database connected');
 
-    // Define test accounts with PLAIN TEXT passwords
-    // The User model will hash them automatically via beforeCreate hook
+    // Define test accounts with professional email domains
     const testAccounts = [
       {
         email: 'admin@threadsofhope.org',
-        password: 'Admin@2024', // Plain text - will be hashed by User model
+        plainPassword: 'Admin@2024',
         role: 'admin',
         firstName: 'Admin',
         lastName: 'User',
@@ -24,8 +23,8 @@ const seedTestAccounts = async () => {
         emailVerified: true,
       },
       {
-        email: 'ngo@example.org',
-        password: 'NGO@2024', // Plain text - will be hashed by User model
+        email: 'ngo@threadsofhope.org',
+        plainPassword: 'NGO@2024',
         role: 'ngo',
         firstName: 'Hope',
         lastName: 'Foundation',
@@ -34,8 +33,8 @@ const seedTestAccounts = async () => {
         emailVerified: true,
       },
       {
-        email: 'woman@example.com',
-        password: 'Woman@2024', // Plain text - will be hashed by User model
+        email: 'woman@threadsofhope.org',
+        plainPassword: 'Woman@2024',
         role: 'woman',
         firstName: 'Jane',
         lastName: 'Doe',
@@ -44,8 +43,8 @@ const seedTestAccounts = async () => {
         emailVerified: true,
       },
       {
-        email: 'donor@example.com',
-        password: 'Donor@2024', // Plain text - will be hashed by User model
+        email: 'donor@threadsofhope.org',
+        plainPassword: 'Donor@2024',
         role: 'donor',
         firstName: 'John',
         lastName: 'Smith',
@@ -55,33 +54,56 @@ const seedTestAccounts = async () => {
       },
     ];
 
-    for (const account of testAccounts) {
-      const existingUser = await User.findOne({ where: { email: account.email } });
+    for (const accountData of testAccounts) {
+      const { plainPassword, ...accountInfo } = accountData;
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+      
+      const existingUser = await User.findOne({ where: { email: accountInfo.email } });
       
       if (existingUser) {
-        // Update existing user - pass plain text password, beforeUpdate hook will hash it
-        // We need to set the password first, then update other fields to trigger the hook
-        existingUser.password = account.password; // Plain text - hook will hash
-        existingUser.isActive = true;
-        existingUser.isApproved = true;
-        existingUser.emailVerified = true;
-        await existingUser.save(); // This will trigger beforeUpdate hook
-        console.log(`✅ Updated: ${account.email} (${account.role}) - password reset`);
+        // Update existing user with correct password hash and ensure they're approved
+        await existingUser.update({
+          password: hashedPassword, // Update password hash
+          isActive: true,
+          isApproved: true,
+          emailVerified: true,
+          role: accountInfo.role, // Ensure role is correct
+          firstName: accountInfo.firstName,
+          lastName: accountInfo.lastName,
+        });
+        console.log(`✅ Updated: ${accountInfo.email} (${accountInfo.role}) - Password reset`);
       } else {
-        // Create new user - pass plain text, beforeCreate hook will hash it
-        await User.create(account);
-        console.log(`✅ Created: ${account.email} (${account.role})`);
+        // Create new user with hashed password
+        await User.create({
+          ...accountInfo,
+          password: hashedPassword,
+        });
+        console.log(`✅ Created: ${accountInfo.email} (${accountInfo.role})`);
+      }
+    }
+
+    // Verify accounts can be found
+    console.log('\n🔍 Verifying accounts...');
+    for (const accountData of testAccounts) {
+      const user = await User.findOne({ where: { email: accountData.email } });
+      if (user) {
+        const passwordValid = await bcrypt.compare(accountData.plainPassword, user.password);
+        console.log(`   ${accountData.email}: ${passwordValid ? '✅ Password valid' : '❌ Password invalid'} | Active: ${user.isActive} | Approved: ${user.isApproved}`);
+      } else {
+        console.log(`   ${accountData.email}: ❌ Not found`);
       }
     }
 
     console.log('\n🎉 Test accounts seeded successfully!');
     console.log('\n📋 Login Credentials:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('Admin:  admin@threadsofhope.org / Admin@2024');
-    console.log('NGO:    ngo@example.org / NGO@2024');
-    console.log('Woman:  woman@example.com / Woman@2024');
-    console.log('Donor:  donor@example.com / Donor@2024');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    console.log('NGO:    ngo@threadsofhope.org / NGO@2024');
+    console.log('Woman:  woman@threadsofhope.org / Woman@2024');
+    console.log('Donor:  donor@threadsofhope.org / Donor@2024');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     process.exit(0);
   } catch (error) {

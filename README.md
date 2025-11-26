@@ -374,17 +374,19 @@ Email: admin@threadsofhope.org
 Password: Admin@2024
 
 NGO Partner:
-Email: ngo@example.org
+Email: ngo@threadsofhope.org
 Password: NGO@2024
 
 Woman:
-Email: woman@example.com
+Email: woman@threadsofhope.org
 Password: Woman@2024
 
 Donor:
-Email: donor@example.com
+Email: donor@threadsofhope.org
 Password: Donor@2024
 ```
+
+**Note:** These test accounts are created when you run `npm run seed:test-accounts` in the backend directory. Make sure to run this command after setting up your database to ensure these accounts exist and are properly configured.
 
 ## 📚 Documentation
 
