@@ -22,6 +22,7 @@ import api from '../../services/api';
 const TrainingPrograms = () => {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -29,6 +30,7 @@ const TrainingPrograms = () => {
 
   useEffect(() => {
     fetchPrograms();
+    fetchEnrollments();
   }, []);
 
   const fetchPrograms = async () => {
@@ -37,37 +39,75 @@ const TrainingPrograms = () => {
       const response = await api.get('/training', {
         params: { status: 'active' },
       });
-      // Backend returns: { success: true, data: { programs: [...], pagination: {...} } }
-      const responseData = response.data?.data || response.data;
-      const programsList = responseData?.programs || responseData;
-      setPrograms(Array.isArray(programsList) ? programsList : []);
+      // Some backends wrap data differently; support both
+      const data = response.data?.data || response.data;
+      setPrograms(Array.isArray(data) ? data : data?.programs || []);
       setError('');
     } catch (err) {
       console.error('Error fetching training programs:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to load training programs. Please try again.';
-      setError(errorMsg);
-      setPrograms([]); // Set empty array on error
+      setError('Failed to load training programs. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchEnrollments = async () => {
+    try {
+      const response = await api.get('/training/my-enrollments');
+      const data = response.data?.data || response.data || [];
+      setEnrollments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching enrollments:', err);
+      // Don't show error for enrollments, just set empty array
+      setEnrollments([]);
+    }
+  };
+
+  const isEnrolled = (programId) => {
+    return enrollments.some(
+      (enrollment) => enrollment.programId === programId || enrollment.program?.id === programId
+    );
+  };
+
+  const getEnrollmentStatus = (programId) => {
+    const enrollment = enrollments.find(
+      (e) => e.programId === programId || e.program?.id === programId
+    );
+    return enrollment?.status;
+  };
+
   const handleEnroll = async (programId) => {
+    // Prevent enrollment if already enrolled
+    if (isEnrolled(programId)) {
+      setError('You are already enrolled in this program.');
+      return;
+    }
+
     try {
       setEnrollingId(programId);
       setError('');
       setSuccess('');
-      await api.post(`/training/${programId}/enroll`);
-      setSuccess('Successfully enrolled in program!');
-      // Refresh programs list
-      await fetchPrograms();
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
+      
+      const response = await api.post(`/training/${programId}/enroll`);
+      const program = programs.find((p) => p.id === programId);
+      const programTitle = program?.title || 'program';
+      
+      // Show success message with program name
+      const successMessage = response.data?.message || `Successfully enrolled in ${programTitle}!`;
+      setSuccess(successMessage);
+      
+      // Refresh enrollments to update UI
+      await fetchEnrollments();
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
     } catch (err) {
       console.error('Error enrolling in program:', err);
       const message =
         err.response?.data?.message || 'Failed to enroll in program. Please try again.';
       setError(message);
+      // Clear error after 5 seconds
+      setTimeout(() => setError(''), 5000);
     } finally {
       setEnrollingId(null);
     }
@@ -104,7 +144,12 @@ const TrainingPrograms = () => {
       )}
 
       {success && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
+        <Alert 
+          severity="success" 
+          sx={{ mb: 3 }} 
+          onClose={() => setSuccess('')}
+          variant="filled"
+        >
           {success}
         </Alert>
       )}
@@ -152,14 +197,23 @@ const TrainingPrograms = () => {
                   )}
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => handleEnroll(program.id)}
-                    disabled={enrollingId === program.id || program.status !== 'active'}
-                  >
-                    {enrollingId === program.id ? 'Enrolling...' : 'Enroll'}
-                  </Button>
+                  {isEnrolled(program.id) ? (
+                    <Chip
+                      label={`Enrolled (${getEnrollmentStatus(program.id) || 'pending'})`}
+                      color="success"
+                      size="small"
+                      sx={{ textTransform: 'capitalize' }}
+                    />
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => handleEnroll(program.id)}
+                      disabled={enrollingId === program.id || program.status !== 'active'}
+                    >
+                      {enrollingId === program.id ? 'Enrolling...' : 'Enroll'}
+                    </Button>
+                  )}
                 </CardActions>
               </Card>
             </Grid>
