@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Paper, Typography, Box, Card, CardContent, Button, LinearProgress } from '@mui/material';
+import {
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Button,
+  LinearProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Slider,
+  Alert,
+  CircularProgress,
+  Tooltip,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
   School as SchoolIcon,
   EmojiEvents as TrophyIcon,
   TrendingUp as ProgressIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -13,6 +33,12 @@ const WomanDashboard = () => {
   const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [selectedEnrollment, setSelectedEnrollment] = useState(null);
+  const [progressValue, setProgressValue] = useState(0);
+  const [updating, setUpdating] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchEnrollments();
@@ -29,6 +55,60 @@ const WomanDashboard = () => {
       setEnrollments([]); // Set empty array on error
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenProgressDialog = (enrollment) => {
+    setSelectedEnrollment(enrollment);
+    setProgressValue(Number(enrollment.progress) || 0);
+    setProgressDialogOpen(true);
+    setError('');
+    setSuccess('');
+  };
+
+  const handleCloseProgressDialog = () => {
+    setProgressDialogOpen(false);
+    setSelectedEnrollment(null);
+    setProgressValue(0);
+    setError('');
+    setSuccess('');
+  };
+
+  const handleProgressChange = (event, newValue) => {
+    setProgressValue(newValue);
+  };
+
+  const handleProgressInputChange = (event) => {
+    const value = Math.min(100, Math.max(0, parseInt(event.target.value) || 0));
+    setProgressValue(value);
+  };
+
+  const handleUpdateProgress = async () => {
+    if (!selectedEnrollment) return;
+
+    try {
+      setUpdating(true);
+      setError('');
+      setSuccess('');
+
+      await api.put(`/training/enrollments/${selectedEnrollment.id}/progress`, {
+        progress: progressValue,
+      });
+
+      setSuccess('Progress updated successfully!');
+      
+      // Refresh enrollments to show updated progress
+      await fetchEnrollments();
+      
+      // Close dialog after 1.5 seconds
+      setTimeout(() => {
+        handleCloseProgressDialog();
+      }, 1500);
+    } catch (err) {
+      console.error('Error updating progress:', err);
+      setError(err.response?.data?.message || 'Failed to update progress. Please try again.');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -118,13 +198,24 @@ const WomanDashboard = () => {
             ) : (
               activeEnrollments.map((enrollment) => (
                 <Box key={enrollment.id} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="subtitle1">
                       {enrollment.program?.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {Number(enrollment.progress) || 0}%
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {Number(enrollment.progress) || 0}%
+                      </Typography>
+                      <Tooltip title="Update Progress">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleOpenProgressDialog(enrollment)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
                   <LinearProgress
                     variant="determinate"
@@ -137,6 +228,86 @@ const WomanDashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Progress Update Dialog */}
+      <Dialog
+        open={progressDialogOpen}
+        onClose={handleCloseProgressDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Update Progress
+          {selectedEnrollment && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {selectedEnrollment.program?.title}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
+
+          <Box sx={{ mt: 2 }}>
+            <Typography gutterBottom>
+              Progress: {progressValue}%
+            </Typography>
+            <Slider
+              value={progressValue}
+              onChange={handleProgressChange}
+              min={0}
+              max={100}
+              step={1}
+              marks={[
+                { value: 0, label: '0%' },
+                { value: 25, label: '25%' },
+                { value: 50, label: '50%' },
+                { value: 75, label: '75%' },
+                { value: 100, label: '100%' },
+              ]}
+              valueLabelDisplay="auto"
+              sx={{ mb: 3 }}
+            />
+            <TextField
+              fullWidth
+              type="number"
+              label="Progress Percentage"
+              value={progressValue}
+              onChange={handleProgressInputChange}
+              inputProps={{ min: 0, max: 100 }}
+              helperText="Enter a value between 0 and 100"
+            />
+          </Box>
+
+          {progressValue === 100 && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              When you reach 100%, your enrollment will be marked as completed and you'll receive a certificate!
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseProgressDialog} disabled={updating}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleUpdateProgress}
+            variant="contained"
+            disabled={updating}
+            sx={{ minWidth: 120 }}
+          >
+            {updating ? <CircularProgress size={24} /> : 'Update Progress'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
