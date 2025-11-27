@@ -26,9 +26,11 @@ const RegisterChild = () => {
     setLoading(true);
     
     try {
-      await api.post('/children', formData);
+      const response = await api.post('/children', formData);
+      // Show success message
       alert('Child registered successfully!');
-      navigate('/children');
+      // Navigate to the correct children page (NGO route)
+      navigate('/ngo/children');
     } catch (error) {
       console.error('Error registering child:', error);
       alert(error.response?.data?.message || 'Failed to register child');
@@ -126,7 +128,7 @@ const RegisterChild = () => {
                 </Button>
                 <Button
                   variant="outlined"
-                  onClick={() => navigate('/children')}
+                  onClick={() => navigate('/ngo/children')}
                   disabled={loading}
                 >
                   Cancel
