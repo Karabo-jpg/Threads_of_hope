@@ -2,7 +2,7 @@
 
 A secure, cross-platform web and mobile application for coordinating child welfare tracking and empowering women through skills development in Sub-Saharan Africa.
 
-## 📦 Repository Access
+## Repository Access
 
 **This is a public GitHub repository.** You can access it at:
 - **GitHub URL**: https://github.com/Karabo-jpg/Threads_of_hope
@@ -10,13 +10,13 @@ A secure, cross-platform web and mobile application for coordinating child welfa
 
 The repository contains all source code, configuration files, and documentation needed to run the application locally or deploy it to production.
 
-## 🌐 Live Application
+## Live Application
 
 **Try the application online:**
 - **Frontend URL**: https://threads-of-hope-ten.vercel.app
 - The application is deployed and accessible at the above URL
 
-## 🌟 Overview
+## Overview
 
 **Threads of Hope** enables:
 - NGOs to track and coordinate child welfare
@@ -24,35 +24,35 @@ The repository contains all source code, configuration files, and documentation 
 - Donors to transparently track their impact
 - Organizations to collaborate effectively
 
-## 👥 User Roles
+## User Roles
 
 1. **Admin**: Full system access, user management, analytics
 2. **NGO/Partner**: Child registration, welfare tracking, collaboration
 3. **Woman**: Training enrollment, progress tracking, skill development
 4. **Donor**: Fund allocation, impact reporting, transparent tracking
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
-- ✅ Multi-role onboarding and registration
-- ✅ Child welfare tracking with complete history
-- ✅ Women empowerment programs with certifications
-- ✅ Transparent donation tracking and impact reporting
-- ✅ NGO collaboration platform with messaging
-- ✅ Real-time notifications (email, SMS, push)
-- ✅ Comprehensive admin dashboard with analytics
-- ✅ Multi-language support (English, Swahili, French)
+- Multi-role onboarding and registration
+- Child welfare tracking with complete history
+- Women empowerment programs with certifications
+- Transparent donation tracking and impact reporting
+- NGO collaboration platform with messaging
+- Real-time notifications (email, SMS, push)
+- Comprehensive admin dashboard with analytics
+- Multi-language support (English, Swahili, French)
 
 ### Security & Compliance
-- 🔒 JWT and OAuth 2.0 authentication
-- 🔒 Role-based access control (RBAC)
-- 🔒 HTTPS encryption
-- 🔒 Optional 2FA
-- 🔒 GDPR compliance
-- 🔒 Comprehensive audit logging
-- 🔒 Daily automated backups
+- JWT and OAuth 2.0 authentication
+- Role-based access control (RBAC)
+- HTTPS encryption
+- Optional 2FA
+- GDPR compliance
+- Comprehensive audit logging
+- Daily automated backups
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Frontend
 - **Web**: React with TypeScript
@@ -75,7 +75,7 @@ The repository contains all source code, configuration files, and documentation 
 - **Storage**: AWS S3
 - **CDN**: CloudFront
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 threads-of-hope/
@@ -119,7 +119,7 @@ threads-of-hope/
 └── docker-compose.yml   # Docker configuration
 ```
 
-## 🚀 Quick Start - Step-by-Step Setup Instructions
+## Quick Start - Step-by-Step Setup Instructions
 
 Follow these instructions carefully to set up and run the Threads of Hope application on your local machine.
 
@@ -338,7 +338,7 @@ docker-compose up -d
 
 This will start both backend and frontend automatically. However, you still need to configure the `.env` files as described above.
 
-### ✅ Setup Complete - What You Should See
+### Setup Complete - What You Should See
 
 When everything is set up correctly:
 
@@ -364,7 +364,7 @@ When everything is set up correctly:
 
 If you see all of the above, congratulations! Your setup is complete and the application is running successfully. 🎉
 
-## 🔑 Default Credentials
+## Default Credentials
 
 For testing purposes (change in production):
 
@@ -388,7 +388,7 @@ Password: Donor@2024
 
 **Note:** These test accounts are created when you run `npm run seed:test-accounts` in the backend directory. Make sure to run this command after setting up your database to ensure these accounts exist and are properly configured.
 
-## 📚 Documentation
+## Documentation
 
 - [API Reference](docs/API.md)
 - [User Guide](docs/USER_GUIDE.md)
@@ -396,7 +396,7 @@ Password: Donor@2024
 - [Deployment Guide](docs/DEPLOYMENT.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Backend tests
@@ -410,7 +410,7 @@ npm test
 npm run test:coverage
 ```
 
-## 📦 Deployment
+## Deployment
 
 See [Deployment Guide](docs/DEPLOYMENT.md) for detailed instructions.
 
@@ -419,18 +419,18 @@ Quick deploy to AWS:
 npm run deploy:aws
 ```
 
-## 🌍 Localization
+## Localization
 
 The application supports:
-- 🇬🇧 English (default)
-- 🇰🇪 Swahili
-- 🇫🇷 French
+- English (default)
+- Swahili
+- French
 
-## 🤝 Contributing
+## Contributing
 
 This project follows Agile Scrum methodology. Please read our contribution guidelines before submitting PRs.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built to empower communities in Sub-Saharan Africa through technology and collaboration.
 
