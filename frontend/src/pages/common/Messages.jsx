@@ -465,9 +465,11 @@ const Messages = () => {
         fullWidth
         fullScreen={isMobile} // Full screen on mobile
         onEnter={() => {
-          console.log('Dialog entered, fetching women users...');
+          console.log('Dialog entered, fetching recipients...');
           if (user?.role === 'admin' || user?.role === 'ngo') {
             fetchWomen();
+          } else if (user?.role === 'donor') {
+            fetchMessageRecipients();
           }
         }}
       >
@@ -490,32 +492,46 @@ const Messages = () => {
           )}
 
           <FormControl fullWidth margin="normal" required>
-            <InputLabel>Select Recipient (Woman)</InputLabel>
+            <InputLabel>
+              {user?.role === 'donor' ? 'Select Recipient' : 'Select Recipient (Woman)'}
+            </InputLabel>
             <Select
               name="recipientId"
               value={composeData.recipientId}
               onChange={handleComposeChange}
-              label="Select Recipient (Woman)"
-              disabled={loadingWomen || sending}
+              label={user?.role === 'donor' ? 'Select Recipient' : 'Select Recipient (Woman)'}
+              disabled={(loadingWomen || loadingRecipients) || sending}
             >
-              {loadingWomen ? (
+              {(loadingWomen || loadingRecipients) ? (
                 <MenuItem disabled>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CircularProgress size={16} />
-                    <Typography variant="body2">Loading women users...</Typography>
+                    <Typography variant="body2">
+                      {user?.role === 'donor' ? 'Loading recipients...' : 'Loading women users...'}
+                    </Typography>
                   </Box>
                 </MenuItem>
-              ) : women.length === 0 ? (
+              ) : (user?.role === 'donor' ? recipients : women).length === 0 ? (
                 <MenuItem disabled>
                   {composeError && composeError.includes('Failed to load recipients') 
                     ? 'Error loading recipients. Please try again.' 
-                    : 'No women users found'}
+                    : user?.role === 'donor' ? 'No recipients found' : 'No women users found'}
                 </MenuItem>
               ) : (
-                women.map((woman) => (
-                  <MenuItem key={woman.id} value={woman.id}>
-                    {`${woman.firstName || ''} ${woman.lastName || ''}`.trim() || woman.email}
-                    {woman.email && ` (${woman.email})`}
+                (user?.role === 'donor' ? recipients : women).map((recipient) => (
+                  <MenuItem key={recipient.id} value={recipient.id}>
+                    <Box>
+                      <Typography variant="body2">
+                        {`${recipient.firstName || ''} ${recipient.lastName || ''}`.trim() || recipient.email}
+                        {recipient.role && ` (${recipient.role.toUpperCase()})`}
+                        {recipient.hasDonated && ' ✓'}
+                      </Typography>
+                      {recipient.email && (
+                        <Typography variant="caption" color="text.secondary">
+                          {recipient.email}
+                        </Typography>
+                      )}
+                    </Box>
                   </MenuItem>
                 ))
               )}
