@@ -242,7 +242,7 @@ Before you begin, ensure you have the following installed on your computer:
    ```bash
    npm run sync:db
    ```
-   You should see: `✅ All tables created successfully!`
+   You should see: `All tables created successfully!`
 
 6. **Seed test accounts** (optional, for testing)
    ```bash
@@ -344,7 +344,7 @@ When everything is set up correctly:
 
 1. **Backend Terminal** should show:
    ```
-   ✅ Database connection established successfully.
+   Database connection established successfully.
    Server running on port 5000
    ```
 
@@ -362,7 +362,7 @@ When everything is set up correctly:
 
 4. **You can now log in** using the test credentials below.
 
-If you see all of the above, congratulations! Your setup is complete and the application is running successfully. 🎉
+If you see all of the above, congratulations! Your setup is complete and the application is running successfully.
 
 ## Default Credentials
 
