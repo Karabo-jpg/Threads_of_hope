@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Paper, Typography, Box, Card, CardContent, Button } from '@mui/material';
+import { Grid, Paper, Typography, Box, Card, CardContent, Button, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
   Favorite as FavoriteIcon,
@@ -11,6 +11,8 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const DonorDashboard = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ const DonorDashboard = () => {
           variant="contained"
           color="primary"
           onClick={() => navigate('/donor/donations/new')}
-          fullWidth={window.innerWidth < 600}
+          fullWidth={isMobile}
           sx={{ minHeight: { xs: '44px', sm: 'auto' } }}
         >
           Make a Donation
