@@ -28,6 +28,7 @@ router.post('/', authorize('donor'), donationValidation, donationController.crea
 router.get('/', verifyToken, donationController.getAllDonations);
 router.get('/statistics', verifyToken, donationController.getDonationStatistics);
 router.get('/recipients/:type', authorize('donor'), donationController.getRecipients);
+router.get('/message-recipients', authorize('donor'), donationController.getMessageRecipients);
 router.get('/:id', verifyToken, donationController.getDonationById);
 router.post('/:id/impact-reports', authorize('ngo', 'admin'), impactReportValidation, donationController.createImpactReport);
 

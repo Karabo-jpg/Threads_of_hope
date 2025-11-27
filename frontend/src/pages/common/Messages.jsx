@@ -43,7 +43,9 @@ const Messages = () => {
   const [activeTab, setActiveTab] = useState(0); // 0 = Inbox, 1 = Sent
   const [composeOpen, setComposeOpen] = useState(false);
   const [women, setWomen] = useState([]);
+  const [recipients, setRecipients] = useState([]); // For donors: admins and NGOs
   const [loadingWomen, setLoadingWomen] = useState(false);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [composeData, setComposeData] = useState({
     recipientId: '',
     subject: '',
@@ -58,12 +60,15 @@ const Messages = () => {
   }, [activeTab]); // Refetch when tab changes
 
   useEffect(() => {
-    // Fetch women users when compose dialog opens (only for admin and NGO)
-    if (composeOpen && (user?.role === 'admin' || user?.role === 'ngo')) {
-      console.log('Compose dialog opened, fetching women users...');
-      fetchWomen();
-    } else if (composeOpen) {
-      console.log('Compose dialog opened but user role is not admin or NGO:', user?.role);
+    // Fetch recipients when compose dialog opens
+    if (composeOpen) {
+      if (user?.role === 'admin' || user?.role === 'ngo') {
+        console.log('Compose dialog opened, fetching women users...');
+        fetchWomen();
+      } else if (user?.role === 'donor') {
+        console.log('Compose dialog opened, fetching message recipients for donor...');
+        fetchMessageRecipients();
+      }
     }
   }, [composeOpen, user?.role]);
 
@@ -89,15 +94,43 @@ const Messages = () => {
     }
   };
 
+  const fetchMessageRecipients = async () => {
+    console.log('fetchMessageRecipients called');
+    setLoadingRecipients(true);
+    setRecipients([]); // Clear previous data
+    try {
+      // Fetch admins and NGOs for donors
+      console.log('Fetching message recipients from /donations/message-recipients endpoint...');
+      const response = await api.get('/donations/message-recipients');
+      console.log('Message recipients response:', response.data);
+      const data = response.data?.data || {};
+      const allRecipients = [
+        ...(data.admins || []).map(admin => ({ ...admin, role: 'admin' })),
+        ...(data.ngos || []).map(ngo => ({ ...ngo, role: 'ngo' })),
+      ];
+      console.log('Setting recipients:', allRecipients.length, 'recipients found');
+      setRecipients(allRecipients);
+    } catch (error) {
+      console.error('Error fetching message recipients:', error);
+      console.error('Error response:', error.response?.data);
+      setComposeError(`Failed to load recipients: ${error.response?.data?.message || error.message}`);
+      setRecipients([]);
+    } finally {
+      setLoadingRecipients(false);
+    }
+  };
+
   const handleOpenCompose = () => {
     console.log('Opening compose dialog, user role:', user?.role);
     setComposeOpen(true);
     setComposeData({ recipientId: '', subject: '', content: '' });
     setComposeError('');
     setComposeSuccess(false);
-    // Explicitly fetch women when opening (in addition to useEffect)
+    // Explicitly fetch recipients when opening (in addition to useEffect)
     if (user?.role === 'admin' || user?.role === 'ngo') {
       fetchWomen();
+    } else if (user?.role === 'donor') {
+      fetchMessageRecipients();
     }
   };
 
@@ -217,8 +250,8 @@ const Messages = () => {
   // Extra safety check - ensure messages is always an array
   const messagesList = Array.isArray(messages) ? messages : [];
 
-  // Check if user can compose messages (admin or NGO only)
-  const canCompose = user?.role === 'admin' || user?.role === 'ngo';
+  // Check if user can compose messages (admin, NGO, or donor)
+  const canCompose = user?.role === 'admin' || user?.role === 'ngo' || user?.role === 'donor';
 
   return (
     <Box>

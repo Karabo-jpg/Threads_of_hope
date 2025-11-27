@@ -398,4 +398,59 @@ exports.getRecipients = async (req, res, next) => {
   }
 };
 
+// Get message recipients for donors (admins and NGOs they've donated to)
+exports.getMessageRecipients = async (req, res, next) => {
+  try {
+    // Get all admins
+    const admins = await User.findAll({
+      where: { role: 'admin', isActive: true, isApproved: true },
+      attributes: ['id', 'firstName', 'lastName', 'email', 'profilePicture'],
+    });
+
+    // Get all NGOs
+    const allNGOs = await User.findAll({
+      where: { role: 'ngo', isActive: true, isApproved: true },
+      attributes: ['id', 'firstName', 'lastName', 'email', 'profilePicture'],
+    });
+
+    // Get NGOs the donor has donated to
+    const donations = await Donation.findAll({
+      where: { donorId: req.user.id },
+      attributes: ['ngoId'],
+      group: ['ngoId'],
+      raw: true,
+    });
+
+    const donatedNGOIds = donations
+      .map(d => d.ngoId)
+      .filter(id => id !== null);
+
+    // Mark NGOs that have received donations
+    const ngoMap = new Map();
+    allNGOs.forEach(ngo => {
+      ngoMap.set(ngo.id, {
+        ...ngo.toJSON(),
+        hasDonated: donatedNGOIds.includes(ngo.id),
+      });
+    });
+
+    // Sort: NGOs with donations first, then others
+    const sortedNGOs = Array.from(ngoMap.values()).sort((a, b) => {
+      if (a.hasDonated && !b.hasDonated) return -1;
+      if (!a.hasDonated && b.hasDonated) return 1;
+      return 0;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        admins: admins.map(a => a.toJSON()),
+        ngos: sortedNGOs,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
