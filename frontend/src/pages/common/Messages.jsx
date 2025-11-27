@@ -21,6 +21,7 @@ import {
   Select,
   MenuItem,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { Send as SendIcon, Edit as EditIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
@@ -52,19 +53,29 @@ const Messages = () => {
   useEffect(() => {
     // Fetch women users when compose dialog opens (only for admin and NGO)
     if (composeOpen && (user?.role === 'admin' || user?.role === 'ngo')) {
+      console.log('Compose dialog opened, fetching women users...');
       fetchWomen();
+    } else if (composeOpen) {
+      console.log('Compose dialog opened but user role is not admin or NGO:', user?.role);
     }
   }, [composeOpen, user?.role]);
 
   const fetchWomen = async () => {
+    console.log('fetchWomen called');
     setLoadingWomen(true);
+    setWomen([]); // Clear previous data
     try {
       // Use general users endpoint (accessible to both admin and NGO)
+      console.log('Fetching women from /users endpoint...');
       const response = await api.get('/users?role=woman&isApproved=true&isActive=true&limit=100');
+      console.log('Women users response:', response.data);
       const users = response.data?.data || [];
+      console.log('Setting women users:', users.length, 'users found');
       setWomen(users);
     } catch (error) {
       console.error('Error fetching women users:', error);
+      console.error('Error response:', error.response?.data);
+      setComposeError(`Failed to load recipients: ${error.response?.data?.message || error.message}`);
       setWomen([]);
     } finally {
       setLoadingWomen(false);
@@ -72,10 +83,15 @@ const Messages = () => {
   };
 
   const handleOpenCompose = () => {
+    console.log('Opening compose dialog, user role:', user?.role);
     setComposeOpen(true);
     setComposeData({ recipientId: '', subject: '', content: '' });
     setComposeError('');
     setComposeSuccess(false);
+    // Explicitly fetch women when opening (in addition to useEffect)
+    if (user?.role === 'admin' || user?.role === 'ngo') {
+      fetchWomen();
+    }
   };
 
   const handleCloseCompose = () => {
@@ -316,11 +332,27 @@ const Messages = () => {
       </Grid>
 
       {/* Compose New Message Dialog */}
-      <Dialog open={composeOpen} onClose={handleCloseCompose} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={composeOpen} 
+        onClose={handleCloseCompose} 
+        maxWidth="sm" 
+        fullWidth
+        onEnter={() => {
+          console.log('Dialog entered, fetching women users...');
+          if (user?.role === 'admin' || user?.role === 'ngo') {
+            fetchWomen();
+          }
+        }}
+      >
         <DialogTitle>Compose New Message</DialogTitle>
         <DialogContent>
-          {composeError && (
+          {composeError && !composeError.includes('Failed to load recipients') && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setComposeError('')}>
+              {composeError}
+            </Alert>
+          )}
+          {composeError && composeError.includes('Failed to load recipients') && (
+            <Alert severity="warning" sx={{ mb: 2 }} onClose={() => setComposeError('')}>
               {composeError}
             </Alert>
           )}
@@ -340,9 +372,18 @@ const Messages = () => {
               disabled={loadingWomen || sending}
             >
               {loadingWomen ? (
-                <MenuItem disabled>Loading women users...</MenuItem>
+                <MenuItem disabled>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={16} />
+                    <Typography variant="body2">Loading women users...</Typography>
+                  </Box>
+                </MenuItem>
               ) : women.length === 0 ? (
-                <MenuItem disabled>No women users found</MenuItem>
+                <MenuItem disabled>
+                  {composeError && composeError.includes('Failed to load recipients') 
+                    ? 'Error loading recipients. Please try again.' 
+                    : 'No women users found'}
+                </MenuItem>
               ) : (
                 women.map((woman) => (
                   <MenuItem key={woman.id} value={woman.id}>
