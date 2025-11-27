@@ -22,8 +22,10 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { Send as SendIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Send as SendIcon, Edit as EditIcon, Inbox as InboxIcon, Send as SentIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -34,6 +36,7 @@ const Messages = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [reply, setReply] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0); // 0 = Inbox, 1 = Sent
   const [composeOpen, setComposeOpen] = useState(false);
   const [women, setWomen] = useState([]);
   const [loadingWomen, setLoadingWomen] = useState(false);
@@ -48,7 +51,7 @@ const Messages = () => {
 
   useEffect(() => {
     fetchMessages();
-  }, []);
+  }, [activeTab]); // Refetch when tab changes
 
   useEffect(() => {
     // Fetch women users when compose dialog opens (only for admin and NGO)
@@ -129,7 +132,8 @@ const Messages = () => {
       });
 
       setComposeSuccess(true);
-      // Refresh messages
+      // Refresh messages (switch to sent tab and refresh)
+      setActiveTab(1); // Switch to Sent tab
       await fetchMessages();
       // Close dialog after a short delay
       setTimeout(() => {
@@ -144,9 +148,12 @@ const Messages = () => {
   };
 
   const fetchMessages = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/messages');
-      console.log('Messages API response:', response.data);
+      // Fetch based on active tab: 0 = Inbox, 1 = Sent
+      const endpoint = activeTab === 0 ? '/messages/inbox' : '/messages/sent';
+      const response = await api.get(endpoint);
+      console.log(`${activeTab === 0 ? 'Inbox' : 'Sent'} messages API response:`, response.data);
       
       // Backend returns: { success: true, data: { messages: [...], pagination: {...} } }
       const data = response.data?.data || response.data;
@@ -155,10 +162,13 @@ const Messages = () => {
       // Ensure messages is always an array
       const messagesList = Array.isArray(messagesData) ? messagesData : [];
       
-      console.log('Setting messages to:', messagesList);
+      console.log(`Setting ${activeTab === 0 ? 'inbox' : 'sent'} messages to:`, messagesList);
       setMessages(messagesList);
+      // Clear selected message when switching tabs
+      setSelectedMessage(null);
+      setReply('');
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error(`Error fetching ${activeTab === 0 ? 'inbox' : 'sent'} messages:`, error);
       console.error('Error details:', error.response?.data);
       setMessages([]);
     } finally {
@@ -182,7 +192,7 @@ const Messages = () => {
         content: reply,
       });
       setReply('');
-      // Refresh messages after sending
+      // Refresh messages after sending (stay on current tab)
       await fetchMessages();
       // Mark current message as read if not already
       if (!selectedMessage.isRead && selectedMessage.id) {
@@ -223,55 +233,88 @@ const Messages = () => {
         )}
       </Box>
 
+      {/* Tabs for Inbox and Sent */}
+      <Paper sx={{ mb: 2 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+          indicatorColor="primary"
+          textColor="primary"
+        >
+          <Tab icon={<InboxIcon />} iconPosition="start" label="Inbox" />
+          <Tab icon={<SentIcon />} iconPosition="start" label="Sent" />
+        </Tabs>
+      </Paper>
+
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid item xs={12} md={4}>
           <Paper sx={{ maxHeight: '70vh', overflow: 'auto' }}>
             <List>
-              {messagesList.length === 0 ? (
+              {loading ? (
+                <ListItem>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 2 }}>
+                    <CircularProgress />
+                  </Box>
+                </ListItem>
+              ) : messagesList.length === 0 ? (
                 <ListItem>
                   <ListItemText
-                    primary="No messages"
-                    secondary="Your inbox is empty"
+                    primary={`No ${activeTab === 0 ? 'inbox' : 'sent'} messages`}
+                    secondary={`Your ${activeTab === 0 ? 'inbox is' : 'sent messages folder is'} empty`}
                   />
                 </ListItem>
               ) : (
-                messagesList.map((message) => (
-                  <React.Fragment key={message.id}>
-                    <ListItem
-                      button
-                      selected={selectedMessage?.id === message.id}
-                      onClick={() => setSelectedMessage(message)}
-                    >
-                      <ListItemAvatar>
-                        <Avatar>
-                          {message.sender?.firstName?.charAt(0) || 
-                           message.senderName?.charAt(0) || 
-                           'U'}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={message.subject || 'No Subject'}
-                        secondary={
-                          <React.Fragment>
-                            <Typography variant="body2" component="span">
-                              {message.sender 
-                                ? `${message.sender.firstName || ''} ${message.sender.lastName || ''}`.trim() || message.sender.email
-                                : message.senderName || 'Unknown Sender'}
-                            </Typography>
-                            <br />
-                            {new Date(message.createdAt).toLocaleDateString()}
-                            {!message.isRead && (
-                              <Typography variant="caption" color="primary" sx={{ ml: 1 }}>
-                                (Unread)
+                messagesList.map((message) => {
+                  // For inbox: show sender, for sent: show recipient
+                  const displayUser = activeTab === 0 
+                    ? (message.sender || { firstName: message.senderName, email: 'Unknown' })
+                    : (message.recipient || { firstName: message.recipientName, email: 'Unknown' });
+                  
+                  const displayName = activeTab === 0
+                    ? (message.sender 
+                        ? `${message.sender.firstName || ''} ${message.sender.lastName || ''}`.trim() || message.sender.email
+                        : message.senderName || 'Unknown Sender')
+                    : (message.recipient
+                        ? `${message.recipient.firstName || ''} ${message.recipient.lastName || ''}`.trim() || message.recipient.email
+                        : message.recipientName || 'Unknown Recipient');
+
+                  return (
+                    <React.Fragment key={message.id}>
+                      <ListItem
+                        button
+                        selected={selectedMessage?.id === message.id}
+                        onClick={() => setSelectedMessage(message)}
+                      >
+                        <ListItemAvatar>
+                          <Avatar>
+                            {displayUser?.firstName?.charAt(0) || 
+                             displayUser?.email?.charAt(0) || 
+                             'U'}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={message.subject || 'No Subject'}
+                          secondary={
+                            <React.Fragment>
+                              <Typography variant="body2" component="span">
+                                {activeTab === 0 ? 'From: ' : 'To: '}
+                                {displayName}
                               </Typography>
-                            )}
-                          </React.Fragment>
-                        }
-                      />
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))
+                              <br />
+                              {new Date(message.createdAt).toLocaleDateString()}
+                              {activeTab === 0 && !message.isRead && (
+                                <Typography variant="caption" color="primary" sx={{ ml: 1 }}>
+                                  (Unread)
+                                </Typography>
+                              )}
+                            </React.Fragment>
+                          }
+                        />
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  );
+                })
               )}
             </List>
           </Paper>
@@ -284,9 +327,19 @@ const Messages = () => {
                 {selectedMessage.subject}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                From: {selectedMessage.sender 
-                  ? `${selectedMessage.sender.firstName || ''} ${selectedMessage.sender.lastName || ''}`.trim() || selectedMessage.sender.email
-                  : selectedMessage.senderName || 'Unknown'}
+                {activeTab === 0 ? (
+                  <>
+                    From: {selectedMessage.sender 
+                      ? `${selectedMessage.sender.firstName || ''} ${selectedMessage.sender.lastName || ''}`.trim() || selectedMessage.sender.email
+                      : selectedMessage.senderName || 'Unknown'}
+                  </>
+                ) : (
+                  <>
+                    To: {selectedMessage.recipient
+                      ? `${selectedMessage.recipient.firstName || ''} ${selectedMessage.recipient.lastName || ''}`.trim() || selectedMessage.recipient.email
+                      : selectedMessage.recipientName || 'Unknown'}
+                  </>
+                )}
                 <br />
                 Date: {new Date(selectedMessage.createdAt).toLocaleString()}
                 {selectedMessage.messageType && (
@@ -300,26 +353,31 @@ const Messages = () => {
               <Typography variant="body1" paragraph>
                 {selectedMessage.content}
               </Typography>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Reply
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                value={reply}
-                onChange={(e) => setReply(e.target.value)}
-                placeholder="Type your reply..."
-              />
-              <Button
-                variant="contained"
-                startIcon={<SendIcon />}
-                onClick={handleSendReply}
-                sx={{ mt: 2 }}
-              >
-                Send Reply
-              </Button>
+              {/* Only show reply section for inbox messages */}
+              {activeTab === 0 && (
+                <>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Reply
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    value={reply}
+                    onChange={(e) => setReply(e.target.value)}
+                    placeholder="Type your reply..."
+                  />
+                  <Button
+                    variant="contained"
+                    startIcon={<SendIcon />}
+                    onClick={handleSendReply}
+                    sx={{ mt: 2 }}
+                  >
+                    Send Reply
+                  </Button>
+                </>
+              )}
             </Paper>
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center', height: '70vh' }}>
