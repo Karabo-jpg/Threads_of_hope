@@ -12,6 +12,8 @@ import {
   Box,
   Typography,
   Divider,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -32,6 +34,8 @@ const Sidebar = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { sidebarOpen } = useSelector((state) => state.ui);
   const { user } = useSelector((state) => state.auth);
 
@@ -78,9 +82,13 @@ const Sidebar = () => {
 
   return (
     <Drawer
-      variant="persistent"
+      variant={isMobile ? 'temporary' : 'persistent'}
       anchor="left"
       open={sidebarOpen}
+      onClose={() => isMobile && dispatch(toggleSidebar())}
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile
+      }}
       sx={{
         width: sidebarOpen ? drawerWidth : 0,
         flexShrink: 0,

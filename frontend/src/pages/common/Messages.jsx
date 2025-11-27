@@ -27,11 +27,15 @@ import {
 } from '@mui/material';
 import { Send as SendIcon, Edit as EditIcon, Inbox as InboxIcon, Send as SentIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
+import { useMediaQuery, useTheme } from '@mui/material';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const Messages = () => {
   const { user } = useSelector((state) => state.auth);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [messages, setMessages] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [reply, setReply] = useState('');
@@ -218,8 +222,15 @@ const Messages = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4">
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 1, sm: 0 },
+        mb: 2 
+      }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
           Messages
         </Typography>
         {canCompose && (
@@ -227,8 +238,11 @@ const Messages = () => {
             variant="contained"
             startIcon={<EditIcon />}
             onClick={handleOpenCompose}
+            size={isMobile ? 'small' : 'medium'}
+            fullWidth={isMobile}
+            sx={{ minHeight: { xs: '44px', sm: 'auto' } }} // Ensure touch target is large enough
           >
-            Compose New Message
+            {isMobile ? 'Compose' : 'Compose New Message'}
           </Button>
         )}
       </Box>
@@ -247,8 +261,14 @@ const Messages = () => {
       </Paper>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ maxHeight: '70vh', overflow: 'auto' }}>
+        <Grid item xs={12} md={4} sx={{ 
+          order: { xs: selectedMessage ? 2 : 1, md: 1 },
+          display: { xs: selectedMessage ? 'none' : 'block', md: 'block' }
+        }}>
+          <Paper sx={{ 
+            maxHeight: { xs: '50vh', md: '70vh' }, 
+            overflow: 'auto'
+          }}>
             <List>
               {loading ? (
                 <ListItem>
@@ -320,9 +340,24 @@ const Messages = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} sx={{ 
+          order: { xs: selectedMessage ? 1 : 2, md: 2 }
+        }}>
           {selectedMessage ? (
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ 
+              p: { xs: 2, sm: 3 },
+              position: 'relative'
+            }}>
+              {/* Back button for mobile/tablet */}
+              {isTablet && (
+                <Button
+                  onClick={() => setSelectedMessage(null)}
+                  sx={{ mb: 2, minHeight: '44px' }}
+                  size="small"
+                >
+                  ← Back to Messages
+                </Button>
+              )}
               <Typography variant="h6" gutterBottom>
                 {selectedMessage.subject}
               </Typography>
@@ -395,6 +430,7 @@ const Messages = () => {
         onClose={handleCloseCompose} 
         maxWidth="sm" 
         fullWidth
+        fullScreen={isMobile} // Full screen on mobile
         onEnter={() => {
           console.log('Dialog entered, fetching women users...');
           if (user?.role === 'admin' || user?.role === 'ngo') {

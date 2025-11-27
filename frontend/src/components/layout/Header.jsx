@@ -14,6 +14,8 @@ import {
   Box,
   Select,
   FormControl,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,6 +30,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useSelector((state) => state.auth);
   const { unreadCount } = useSelector((state) => state.notifications);
   const { language } = useSelector((state) => state.ui);
@@ -70,23 +74,35 @@ const Header = () => {
           <MenuIcon />
         </IconButton>
 
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {t('common.welcome')}, {user?.firstName}!
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontSize: { xs: '0.9rem', sm: '1.25rem' }, // Smaller on mobile
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {isMobile ? user?.firstName : `${t('common.welcome')}, ${user?.firstName}!`}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* Language selector */}
-          <FormControl size="small" variant="outlined">
-            <Select
-              value={language}
-              onChange={handleLanguageChange}
-              sx={{ minWidth: 80 }}
-            >
-              <MenuItem value="en">English</MenuItem>
-              <MenuItem value="sw">Swahili</MenuItem>
-              <MenuItem value="fr">Français</MenuItem>
-            </Select>
-          </FormControl>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+          {/* Language selector - hide on very small screens */}
+          {!isMobile && (
+            <FormControl size="small" variant="outlined">
+              <Select
+                value={language}
+                onChange={handleLanguageChange}
+                sx={{ minWidth: 80 }}
+              >
+                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="sw">Swahili</MenuItem>
+                <MenuItem value="fr">Français</MenuItem>
+              </Select>
+            </FormControl>
+          )}
 
           {/* Notifications */}
           <IconButton

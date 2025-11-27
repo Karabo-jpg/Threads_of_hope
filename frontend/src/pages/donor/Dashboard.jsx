@@ -33,14 +33,23 @@ const DonorDashboard = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 2, sm: 0 },
+        mb: 3 
+      }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
           Donor Dashboard
         </Typography>
         <Button
           variant="contained"
           color="primary"
           onClick={() => navigate('/donor/donations/new')}
+          fullWidth={window.innerWidth < 600}
+          sx={{ minHeight: { xs: '44px', sm: 'auto' } }}
         >
           Make a Donation
         </Button>
